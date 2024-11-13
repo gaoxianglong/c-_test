@@ -21,7 +21,7 @@ public:
     }
 
     float getWidth() {
-        return 123.4f;
+        return 123.45f;
     }
 
     double getHeight() {
@@ -32,105 +32,106 @@ public:
         return true;
     }
 
-    virtual short getAge() {
-        return 32;
+    virtual void exe() {
+        cout << "User1 exe..." << endl;
     }
 
     User1() {
-        cout << "==== init User1 ====" << endl;
+        cout << "User1 init..." << endl;
     }
 
     ~User1() {
-        cout << "==== destroy User1 ====" << endl;
+        cout << "User1 destroy..." << endl;
     }
 };
 
 class User2 : public User1 {
 public:
+    void exe() override {
+        cout << "User2 exe..." << endl;
+    }
+
     User2() {
-        cout << "==== init User2 ====" << endl;
+        cout << "User2 init..." << endl;
     }
 
     ~User2() {
-        cout << "==== destroy User2 ====" << endl;
-    }
-
-    short getAge() override {
-        return 33;
+        cout << "User2 destroy..." << endl;
     }
 };
 
 struct User3 {
+public:
     string account, pwd;
 };
 
 union Data {
     int a;
-    double b;
+    long b;
 };
 
 int add(int a, int b);
 
 int mul(int a, int b);
 
-int mulTable();
+void mulTable();
 
-// 函数指针
-int methodPtr1(int (addPtr1)(int, int), int a, int b);
+int methodPtr(int (*addPtr)(int, int), int a, int b);
 
 string methodPtr2(string (User1::*namePtr)(string), User1 *user1, string name);
 
 string methodPtr3(string (User1::*namePtr)(string), User1 &user1, string name);
 
-int main(int argc, char *argv[]) { {
+int main(int argc, char *argv[]) {
+    // 基础
+    {
         cout << "Please input:" << endl;
-        string name;
-        getline(cin, name);
+        string input;
+        getline(cin, input);
         User1 user1;
+        cout << format("id:{},name:{},fn:{},width:{},height:{},sex:{}", user1.getId(), user1.getName(input),
+                       user1.getFirstName(), user1.getWidth(), user1.getHeight(), user1.getSex()) << endl;
+        user1.exe();
+        cout << format("input size:{}", input.size() * sizeof(char)) << endl;
+
         User3 user3;
         user3.account = "admin";
         user3.pwd = "123";
-        cout << format("id:{},name:{},fn:{},width:{},height:{},sex:{},age:{},account:{},pwd:{}", user1.getId(),
-                       user1.getName(name),
-                       user1.getFirstName(),
-                       user1.getWidth(), user1.getHeight(), user1.getSex(), user1.getAge(), user3.account,
-                       user3.pwd) << endl;
+        cout << format("account:{},pwd:{}", user3.account, user3.pwd) << endl;
+
         Data data;
-        data.a = numeric_limits<int>::min();
-        data.b = numeric_limits<long>::max();
-        cout << format("size:{}", sizeof(data)) << endl;
+        data.b = 1000;
+        data.a = 10;
+        cout << format("data.a==1:{},dada.size==8:{}", data.a == 10, sizeof(data) == 8) << endl;
     }
-    // 运算符、类型转换
+
+    // 运算符
     {
-        cout << format("add:{},mul:{}", add(1, 2), mul(2, 3)) << endl;
-        mulTable();
         cout << format("int size:{},int min:{},int max:{}", sizeof(int), numeric_limits<int>::min(),
                        numeric_limits<int>::max()) << endl;
         cout << format("short size:{},short min:{},short max:{}", sizeof(short), numeric_limits<short>::min(),
                        numeric_limits<short>::max()) << endl;
         cout << format("long size:{},long min:{},long max:{}", sizeof(long), numeric_limits<long>::min(),
                        numeric_limits<long>::max()) << endl;
-        cout << format("long long size:{},int min:{},int max:{}", sizeof(long long), numeric_limits<long long>::min(),
+        cout << format("long long size:{},long long min:{},long long max:{}", sizeof(long long),
+                       numeric_limits<long long>::min(),
                        numeric_limits<long long>::max()) << endl;
         cout << format("float size:{},float min:{},float max:{}", sizeof(float), numeric_limits<float>::min(),
                        numeric_limits<float>::max()) << endl;
         cout << format("double size:{},double min:{},double max:{}", sizeof(double), numeric_limits<double>::min(),
                        numeric_limits<double>::max()) << endl;
-        cout << format("1<<1:{},2>>1:{}", 1 << 1, 2 >> 1) << endl;
 
-        int a = 10;
-        long b = 100;
-        cout << format("long2int:{}", (static_cast<int>(b))) << endl;
-        User1 *user2 = new User2;
-        User2 *u2 = dynamic_cast<User2 *>(user2);
-        cout << format("age:{}", u2->getAge()) << endl;
-        delete u2;
+        cout << format("1<<1:{},2>>1:{}", 1 << 1, 2 >> 1) << endl;
+        cout << format("add:{},mul:{}", add(1, 2), mul(2, 3)) << endl;
+        mulTable();
     }
-    // 流程控制语句
+
+    // 流程控制
     {
         cout << "Please input:" << endl;
-        int input;
+        int input = 0;
         cin >> input;
+
         if (input <= 5) {
             cout << "input <= 5" << endl;
         } else {
@@ -149,15 +150,15 @@ int main(int argc, char *argv[]) { {
         }
 
         int count = 0;
-        for (int i = input; i < 10; i++) {
-            if ((i & 1) == 0) {
+        for (; input <= 10; input++) {
+            if ((input & 1) == 1) {
                 count++;
             }
         }
         cout << format("count:{}", count) << endl;
 
-        while (input < 20) {
-            if ((input++ & 1) == 1) {
+        while (input <= 20) {
+            if ((input++ & 1) == 0) {
                 count++;
             }
         }
@@ -165,97 +166,117 @@ int main(int argc, char *argv[]) { {
 
         do {
             cout << format("input:{}", input++) << endl;
-        } while (input < 30);
+        } while (input <= 30);
     }
+
     // lambda
     {
         int a = 10;
         int b = 20;
-        auto rlt = [&a,b](int c) {
+        auto rlt1 = [&a,b](int c) {
             a = 20;
             return a + b + c;
         };
-        cout << format("a:{},b:{},rlt:{}", a, b, rlt(10)) << endl;
+        cout << format("a:{},b:{},rlt:{}", a, b, rlt1(10)) << endl;
 
         auto rlt2 = [&]() {
             a = 1;
             b = 1;
             return (a + b) << 1;
         };
-        cout << format("a:{},b:{},rlt2:{}", a, b, rlt2()) << endl;
+        cout << format("a:{},b:{},rlt:{}", a, b, rlt2()) << endl;
     }
+
     // 数组
     {
         int arr1[5] = {1, 2, 3, 4, 5};
-        int size = sizeof(arr1) / sizeof(arr1[0]);
-        int *arr2 = new int[5];
+        int size = sizeof(arr1) / sizeof(int);
+        int *arr2 = new int[size];
         for (int i = 0; i < size; i++) {
-            arr2[i] = arr1[i];
-            cout << format("add2[{}]:{}", i, arr2[i]) << endl;
+            arr2[i] = arr1[i] << 1;
+            cout << format("arr2[{}]:{}", i, arr2[i]) << endl;
         }
+        delete []arr2;
 
         array<int, 5> arr3 = {1, 2, 3, 4, 5};
         vector<int> arr4(5);
-        for (int i = 0; i < arr3.size(); i++) {
-            arr4.push_back(arr3[i]);
+        for (auto a: arr3) {
+            arr4.push_back(a);
         }
-        cout << format("arr4 size==10:{},arr4[0]==0:{}", arr4.size() == 10, arr4[0] == 0) << endl;
+        cout << format("arr4.length==10:{},arr4[0]==0", arr4.size() == 10, arr4[0] == 0) << endl;
     }
+
     // 动态类型
     {
         int a = 10;
         void *b = &a;
-        b = new int(20);
-        cout << format("void2int:{}", *(static_cast<int *>(b))) << endl;
+        cout << format("b:{}", *(static_cast<int *>(b))) << endl;
 
         any c = a;
         if (c.type() == typeid(int)) {
-            cout << format("any2int:{}", any_cast<int>(c)) << endl;
+            cout << format("c:{}", any_cast<int>(c)) << endl;
         }
     }
+
+    // 类型转换
+    {
+        long a = 20;
+        cout << format("long2int:{}", static_cast<int>(a)) << endl;
+
+        User1 *u1 = new User2;
+        u1->exe();
+        User2 *u2 = dynamic_cast<User2 *>(u1);
+        cout << "u2 address:" << u2 << endl;
+        delete u2;
+
+        // 悬垂指针
+        cout << "u1 address:" << u1 << ",u1!=null:" << boolalpha << (u1 != nullptr) << endl;
+        u1 = nullptr;
+    }
+
     // 指针
     {
         // 普通指针
         {
             int a = 10;
             int *b = &a;
-            *b = 30;
-            cout << format("a:{},b:{},a==b:{}", a, *b, &a == b) << endl;
+            *b = 1;
+            cout << format("a:{},b:{}", a, *b) << endl;
         }
+
         // 函数指针
         {
-            cout << format("methodPtr1:{}", methodPtr1(add, 1, 2)) << endl;
-            cout << format("methodPtr2:{}", methodPtr2(&User1::getName, new User1, "admin1")) << endl;
-            User1 user1;
-            cout << format("methodPtr3:{}", methodPtr3(&User1::getName, user1, "admin2")) << endl;
+            cout << format("add:{}", methodPtr(add, 10, 20)) << endl;
+            cout << format("name:{}", methodPtr2(&User1::getName, new User1, "admin")) << endl;
+            User2 user2;
+            cout << format("name:{}", methodPtr3(&User1::getName, user2, "admin2")) << endl;
         }
-        // 唯一指针
+
+        // 智能指针
         {
-            unique_ptr<User1> user1 = make_unique<User1>();
+            // 唯一指针
+            unique_ptr<User1> u1 = make_unique<User1>();
             // 转让所有权
-            unique_ptr<User1> user1_ = move(user1);
-            cout << format("user1==null:{}", user1 == nullptr) << endl;
-        }
-        // 共享指针
-        {
-            shared_ptr<User1> user1 = make_shared<User1>();
-            shared_ptr<User1> user2 = user1;
-            shared_ptr<User1> user3 = user1;
-            cout << format("ref size:{}", user3.use_count()) << endl;
-        }
-        // 若指针
-        {
-            shared_ptr<User1> user1 = make_shared<User1>();
-            weak_ptr<User1> w1 = user1;
-            weak_ptr<User1> w2 = user1;
-            cout << format("ref size==1:{}", user1.use_count() == 1) << endl;
-            if (auto u2 = w2.lock()) {
-                cout << format("ref size==2:{}", user1.use_count() == 2) << endl;
+            unique_ptr<User1> u2 = move(u1);
+            cout << format("u1==null:{}", u1 == nullptr) << endl;
+
+            // 共享指针
+            shared_ptr<User1> u3 = make_shared<User1>();
+            shared_ptr<User1> u4 = u3;
+            shared_ptr<User1> u5 = u3;
+            cout << format("ref count==3:{}", u3.use_count() == 3) << endl;
+
+            // 弱指针
+            shared_ptr<User1> u6 = make_shared<User1>();
+            weak_ptr<User1> u7 = u6;
+            weak_ptr<User1> u8 = u6;
+            cout << format("ref count==1:{}", u6.use_count() == 1) << endl;
+            if (auto u9 = u8.lock()) {
+                cout << format("ref count==2:{}", u6.use_count() == 2) << endl;
             }
-            cout << format("ref size==1:{}", user1.use_count() == 1) << endl;
+            cout << format("ref count==1:{}", u6.use_count() == 1) << endl;
         }
     }
-
     return 0;
 }
 
@@ -267,7 +288,7 @@ int mul(int a, int b) {
     return a * b;
 }
 
-int mulTable() {
+void mulTable() {
     for (int i = 1; i <= 9; i++) {
         for (int j = 1; j <= i; j++) {
             cout << format("{}*{}={}\t", j, i, j * i);
@@ -276,8 +297,8 @@ int mulTable() {
     }
 }
 
-int methodPtr1(int (*addPtr1)(int, int), int a, int b) {
-    return addPtr1(a, b);
+int methodPtr(int (*addPtr)(int, int), int a, int b) {
+    return addPtr(a, b);
 }
 
 string methodPtr2(string (User1::*namePtr)(string), User1 *user1, string name) {
