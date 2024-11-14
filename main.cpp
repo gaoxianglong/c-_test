@@ -1,6 +1,10 @@
 #include <any>
 #include <iostream>
 #include "Account.h"
+#include <format>
+#include <memory>
+#include <vector>
+
 // 加了#idndef包含保护,多次定义会被忽略
 #include "Account.h"
 
@@ -62,6 +66,21 @@ public:
 
     ~User2() {
         cout << "User2 destroy..." << endl;
+    }
+};
+
+class User4 : public User1 {
+public:
+    User4() {
+        cout << "User4 init..." << endl;
+    }
+
+    ~User4() {
+        cout << "User4 destroy..." << endl;
+    }
+
+    void exe() override {
+        cout << "User4 exe..." << endl;
     }
 };
 
@@ -130,6 +149,9 @@ struct User2VO : public UserVO {
 };
 
 int main(int argc, char *argv[]) {
+    // 查看C++的版本
+    std::cout << __cplusplus << std::endl;
+
     // 基础
     {
         cout << "Please input:" << endl;
@@ -251,6 +273,58 @@ int main(int argc, char *argv[]) {
             arr4.push_back(a);
         }
         cout << format("arr4.length==10:{},arr4[0]==0", arr4.size() == 10, arr4[0] == 0) << endl;
+
+        // 数组的多种写法
+        {
+            // 数组的第1种写法
+            {
+                User1 u1, u2;
+                User1 arr[2] = {u1, u2};
+            }
+            // 数组的第2种写法
+            {
+                User1 u1, u2;
+                User1 arr[] = {u1, u2};
+            }
+            // 数组的第3种写法
+            {
+                User1 u1, u2;
+                // 静态指针数组
+                User1 *arr[2] = {&u1, &u2};
+            }
+            // 数组的第4种写法
+            {
+                // 数组元素是指针
+                User1 *arr[2] = {new User1, new User2};
+                delete arr[0];
+                delete arr[1];
+            }
+            // 动态数组
+            // 数组的第4种写法
+            {
+                User2 u2;
+                u2.name = "admin";
+                User4 u4;
+                // 数组元素是对象
+                // 非指针数组会导致丧失多态特性
+                User1 *arr = new User1[2]{u2, u4};
+                arr[0].name = "admin2";
+                cout << format("<<<:{}", u2.name) << endl;
+                // arr[1] = u4;
+                delete[] arr;
+            }
+            // 数组的第5种写法(指针数组)
+            {
+                // 动态指针数组
+                User1 **arr3 = new User1 *[]{new User1, new User2};
+                // arr3[0] = new User2;
+                // arr3[1] = new User4;
+                // 单独释放指针元素
+                delete arr3[0];
+                delete arr3[1];
+                delete[] arr3;
+            }
+        }
     }
 
     // 动态类型
@@ -359,6 +433,15 @@ int main(int argc, char *argv[]) {
         user3VO.id = 123;
         user3VO.name = "admin2";
         cout << format("id:{},account:{}", user3VO.id, user3VO.name) << endl;
+    }
+
+    // oop
+    {
+        User1 *u4[2] = {new User2, new User4};
+        for (auto a: u4) {
+            a->exe();
+            delete a;
+        }
     }
     return 0;
 }
