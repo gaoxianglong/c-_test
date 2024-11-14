@@ -55,6 +55,12 @@ build CMakeFiles/c__test.dir/main.cpp.o: CXX_COMPILER__c__test_unscanned_Debug /
   OBJECT_DIR = CMakeFiles/c__test.dir
   OBJECT_FILE_DIR = CMakeFiles/c__test.dir
 
+build CMakeFiles/c__test.dir/Account.cpp.o: CXX_COMPILER__c__test_unscanned_Debug /Users/johngao/Desktop/Desktop/project/c-_test/Account.cpp || cmake_object_order_depends_target_c__test
+  DEP_FILE = CMakeFiles/c__test.dir/Account.cpp.o.d
+  FLAGS = -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.0.sdk -fcolor-diagnostics
+  OBJECT_DIR = CMakeFiles/c__test.dir
+  OBJECT_FILE_DIR = CMakeFiles/c__test.dir
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target c__test
@@ -63,7 +69,7 @@ build CMakeFiles/c__test.dir/main.cpp.o: CXX_COMPILER__c__test_unscanned_Debug /
 #############################################
 # Link the executable c__test
 
-build c__test: CXX_EXECUTABLE_LINKER__c__test_Debug CMakeFiles/c__test.dir/main.cpp.o
+build c__test: CXX_EXECUTABLE_LINKER__c__test_Debug CMakeFiles/c__test.dir/main.cpp.o CMakeFiles/c__test.dir/Account.cpp.o
   FLAGS = -g -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.0.sdk
   OBJECT_DIR = CMakeFiles/c__test.dir
   POST_BUILD = :

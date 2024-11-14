@@ -1,7 +1,12 @@
 #include <any>
 #include <iostream>
+#include "Account.h"
+// 加了#idndef包含保护,多次定义会被忽略
+#include "Account.h"
 
+using namespace c_test;
 using namespace std;
+
 
 class User1 {
 public:
@@ -81,6 +86,48 @@ int methodPtr(int (*addPtr)(int, int), int a, int b);
 string methodPtr2(string (User1::*namePtr)(string), User1 *user1, string name);
 
 string methodPtr3(string (User1::*namePtr)(string), User1 &user1, string name);
+
+// 局部静态变量
+void requestCount() {
+    // 全局只会初始化一次
+    static long count = 0;
+    cout << format("count:{}", ++count) << endl;
+}
+
+// 全局静态变量
+static int id = 0;
+
+// 结构体
+struct UserVO {
+    int id;
+    string account;
+
+    UserVO() {
+        cout << format("UserVO init...") << endl;
+    }
+
+    ~UserVO() {
+        cout << format("UserVO destroy...") << endl;
+    }
+
+    virtual void exe() {
+        cout << "UserVO exe" << endl;
+    }
+};
+
+struct User2VO : public UserVO {
+    User2VO() {
+        cout << format("User2VO init...") << endl;
+    }
+
+    ~User2VO() {
+        cout << format("User2VO destroy...") << endl;
+    }
+
+    void exe() override {
+        cout << "User2VO exe" << endl;
+    }
+};
 
 int main(int argc, char *argv[]) {
     // 基础
@@ -276,6 +323,42 @@ int main(int argc, char *argv[]) {
             }
             cout << format("ref count==1:{}", u6.use_count() == 1) << endl;
         }
+    }
+
+    // 文件头&定义
+    {
+        Account account("admin", "123");
+        cout << format("account:{},pwd:{}", account.getAccount(), account.getPwd()) << endl;
+        cout << format("static value:{}", Account::id) << endl;
+        // 修改类静态变量的值
+        Account::id = 30;
+        cout << format("static value:{}", Account::id) << endl;
+
+        // 访问局部静态变量
+        for (int i = 0; i < 10; i++) {
+            requestCount();
+        }
+
+        // 访问全局静态变量
+        id = 10;
+        cout << format("global id:{}", id) << endl;
+    }
+
+    // 结构体
+    {
+        UserVO *userVO = new User2VO;
+        userVO->id = 1;
+        userVO->account = "admin";
+        cout << format("id:{},account:{}", userVO->id, userVO->account) << endl;
+
+        // 重写
+        userVO->exe();
+        delete userVO;
+
+        User3VO user3VO;
+        user3VO.id = 123;
+        user3VO.name = "admin2";
+        cout << format("id:{},account:{}", user3VO.id, user3VO.name) << endl;
     }
     return 0;
 }
