@@ -300,20 +300,18 @@ int main(int argc, char *argv[]) {
                 delete arr[1];
             }
             // 动态数组
-            // 数组的第4种写法
+            // 数组的第5种写法
             {
                 User2 u2;
-                u2.name = "admin";
-                User4 u4;
                 // 数组元素是对象
                 // 非指针数组会导致丧失多态特性
-                User1 *arr = new User1[2]{u2, u4};
-                arr[0].name = "admin2";
-                cout << format("<<<:{}", u2.name) << endl;
-                // arr[1] = u4;
+                User1 *arr = new User1[2]{u2, User4()};
+                cout << "<<<" << endl;
+                arr[0].exe();
+                arr[1].exe();
                 delete[] arr;
             }
-            // 数组的第5种写法(指针数组)
+            // 数组的第6种写法(指针数组)
             {
                 // 动态指针数组
                 User1 **arr3 = new User1 *[]{new User1, new User2};
