@@ -441,6 +441,151 @@ int main(int argc, char *argv[]) {
             delete a;
         }
     }
+    // 035法则
+    {
+        class User2 {
+        public:
+            User2() {
+                cout << "User2 init..." << endl;
+            }
+
+            ~User2() {
+                cout << "User2 destroy...";
+                cout << this << endl;
+            }
+        };
+
+        class User1 {
+        public:
+            int *id;
+            string **accounts;
+            int size;
+            User2 *u2;
+
+            User1(int id, int size): id(new int(id)), accounts(new string *[size]), size(size), u2(new User2) {
+                for (int i = 0; i < size; i++) {
+                    accounts[i] = new string("admin-" + i);
+                }
+                cout << "User1 init..." << endl;
+            }
+
+            /**
+             * 拷贝构造函数
+             */
+            User1(const User1 &source): id(new int(*source.id)), accounts(new string *[source.size]), size(source.size),
+                                        u2(new User2(*source.u2)) {
+                for (int i = 0; i < source.size; i++) {
+                    if (source.accounts[i] == nullptr) {
+                        continue;
+                    }
+                    accounts[i] = new string(*source.accounts[i]);
+                }
+            }
+
+            /**
+             * 拷贝赋值运算符
+             */
+            User1 & operator=(const User1 &source) {
+                if (&source != this) {
+                    delete id;
+                    for (int i = 0; i < size; i++) {
+                        delete accounts[i];
+                    }
+                    delete[] accounts;
+                    cout << "---" << endl;
+                    delete u2;
+
+                    id = new int(*source.id);
+                    accounts = new string *[source.size];
+                    for (int i = 0; i < source.size; i++) {
+                        accounts[i] = new string(*source.accounts[i]);
+                    }
+                    size = source.size;
+                    u2 = new User2(*source.u2);
+                    cout << "User1 copy..." << endl;
+                }
+                return *this;
+            }
+
+            /**
+             * 移动构造函数
+             */
+            User1(User1 &&source) noexcept : id(source.id), accounts(source.accounts), size(source.size),
+                                             u2(source.u2) {
+                source.id = nullptr;
+                source.accounts = nullptr;
+                source.size = 0;
+                source.u2 = nullptr;
+                cout << "User1 move..." << endl;
+            }
+
+            /**
+             * 移动赋值运算符
+             */
+            User1 & operator =(User1 &&source) noexcept {
+                if (this != &source) {
+                    delete id;
+                    for (int i = 0; i < size; i++) {
+                        delete accounts[i];
+                    }
+                    delete[] accounts;
+                    delete u2;
+
+                    id = source.id;
+                    accounts = source.accounts;
+                    size = source.size;
+                    u2 = source.u2;
+                    source.id = nullptr;
+                    source.accounts = nullptr;
+                    source.size = 0;
+                    source.u2 = nullptr;
+                    cout << "User1 move..." << endl;
+                }
+                return *this;
+            }
+
+            /**
+             * 析构函数
+             */
+            ~User1() {
+                delete id;
+                for (int i = 0; i < size; i++) {
+                    delete accounts[i];
+                }
+                delete[] accounts;
+                delete u2;
+                cout << "User1 destroy..." << endl;
+            }
+        };
+        //
+        {
+            cout << "<<<" << endl;
+            User1 u1(1, 2);
+            User1 u2 = u1;
+        }
+        //
+        {
+            cout << "<<<" << endl;
+            User1 u1(1, 2);
+            User1 u2(2, 2);
+            u1 = u2;
+        }
+        //
+        {
+            cout << "<<<" << endl;
+            User1 u1(1, 2);
+            User1 u2 = std::move(u1);
+            cout << format("u1.id==null:{},u1,account==null:{}", (u1.id == nullptr), (u1.accounts == nullptr)) << endl;
+        }
+        //
+        {
+            cout << "<<<" << endl;
+            User1 u1(1, 2);
+            User1 u2(2, 2);
+            u2 = std::move(u1);
+            cout << format("u1.id==null:{},u1,account==null:{}", (u1.id == nullptr), (u1.accounts == nullptr)) << endl;
+        }
+    }
     return 0;
 }
 
