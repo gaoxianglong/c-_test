@@ -148,6 +148,23 @@ struct User2VO : public UserVO {
     }
 };
 
+/**
+ * 函数重载
+ * @param num
+ * @return
+ */
+string getNumber(string num) {
+    return num;
+}
+
+string getNumber(string num1, string num2) {
+    return num1 + num2;
+}
+
+string getNumber() {
+    return "123";
+}
+
 int main(int argc, char *argv[]) {
     // 查看C++的版本
     std::cout << __cplusplus << std::endl;
@@ -569,6 +586,8 @@ int main(int argc, char *argv[]) {
             User1 u1(1, 2);
             User1 u2(2, 2);
             u1 = u2;
+            cout << format("u1.id=2:{},u1.&id:{:p},u2.&id:{}", *u1.id == 2, static_cast<void *>(u1.id),
+                           static_cast<void *>(u2.id)) << endl;
         }
         //
         {
@@ -585,6 +604,58 @@ int main(int argc, char *argv[]) {
             u2 = std::move(u1);
             cout << format("u1.id==null:{},u1,account==null:{}", (u1.id == nullptr), (u1.accounts == nullptr)) << endl;
         }
+    }
+
+    // 函数重载
+    {
+        cout << format("number:{}", getNumber()) << endl;
+        cout << format("number:{}", getNumber("123456")) << endl;
+        cout << format("number:{}", getNumber("222", "333")) << endl;
+    }
+
+    // 多重继承
+    {
+        class User1 {
+        public:
+            string getName() {
+                return "user1";
+            }
+        };
+        class User2 {
+        public:
+            string getName() {
+                return "user2";
+            }
+        };
+        class User3 : public User2, public User1 {
+        public:
+            string getName() {
+                return User1::getName() + "-" + User2::getName();
+            }
+        };
+
+        cout << "<<<" << endl;
+        User3 user3;
+        cout << format("name:{}", user3.getName()) << endl;
+    }
+    // 虚拟继承
+    {
+        class UserA {
+        public:
+            string getName() {
+                return "admin";
+            }
+        };
+
+        class UserB : virtual public UserA {
+        };
+        class UserC : virtual public UserA {
+        };
+        class UserD : public UserC, public UserB {
+        };
+
+        UserD userD;
+        cout << format("name:{}", userD.getName()) << endl;
     }
     return 0;
 }
