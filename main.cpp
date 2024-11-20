@@ -657,6 +657,64 @@ int main(int argc, char *argv[]) {
         UserD userD;
         cout << format("name:{}", userD.getName()) << endl;
     }
+    // 异常处理
+    {
+        class MyException : public std::exception {
+            string msg;
+
+        public:
+            MyException(string msg): msg(msg) {
+            }
+
+            MyException(string msg, const std::exception &e) {
+                this->msg = format("{}:{}", msg, std::string(e.what()));
+            }
+
+            const char *what() const noexcept override {
+                return msg.c_str();
+            }
+        };
+
+        class User1 {
+        public:
+            void exe1() {
+                try {
+                    throw std::logic_error("error1");
+                } catch (const std::exception &e) {
+                    throw MyException("error2", e);
+                }
+            }
+
+            void exe2() {
+                throw std::runtime_error("runtime_error");
+            }
+
+            void exe3() {
+                throw 123;
+            }
+        };
+
+        try {
+            User1 u1;
+            // u1.exe1();
+            u1.exe2();
+            //u1.exe3();
+        } catch (const MyException &e) {
+            cout << format("MyException:{}", e.what()) << endl;
+        }
+        catch (const std::runtime_error &e) {
+            cout << format("runtime_error:{}", e.what()) << endl;
+        }
+        catch (const std::exception &e) {
+            cout << format("exception:{}", e.what()) << endl;
+        }
+        catch (const int &e) {
+            cout << e << endl;
+        }
+        catch (...) {
+            cout << "other exception..." << endl;
+        }
+    }
     return 0;
 }
 

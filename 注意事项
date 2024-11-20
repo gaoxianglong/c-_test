@@ -60,3 +60,59 @@ D
 
 内存布局
 数据段中的数据只包括静态变量、常量、全局变量，成员变量是在类实例中，类实例可能在堆,也可能在栈
+
+异常处理
+异常类继承关系：
+std::exception
+   ├── std::logic_error
+   │       ├── std::domain_error
+   │       ├── std::invalid_argument
+   │       ├── std::length_error
+   │       └── std::out_of_range
+   └── std::runtime_error
+           ├── std::range_error
+           ├── std::overflow_error
+           ├── std::underflow_error
+           └── 用户自定义的其他派生类
+exception是异常基类，如果抛出的话，构造函数没有任何参数，自定义异常需要继承exception
+	1.	如果异常是因为开发者代码逻辑导致的（参数不合法、数据状态错误），选择 std::logic_error。
+	•	逻辑错误意味着程序需要在开发阶段修复，运行时不应发生。
+	2.	如果异常是因为外部条件（例如文件、网络、用户输入等），选择 std::runtime_error。
+	•	运行时错误意味着需要在运行时捕获并处理。
+c++任何类型的异常都不需要强制捕获，他们仅仅只是语义上的差异。
+class MyException : public std::exception {
+    string msg;
+
+public:
+    MyException(string str) : msg(str) {
+    }
+
+    MyException(string msg, std::exception &e) {
+        this->msg = msg + ":" + string(e.what());
+    }
+
+    const char *what() const noexcept override {
+        return msg.c_str();
+    }
+};
+c++除了异常标准库外，还可以抛出任何类型，比如string、int，捕获时可以使用catch(...)通配符来捕获所有异常(通常是兜底逻辑),由于 catch(...) 不接受参数，你无法通过它直接访问异常的内容。
+noexcept 的主要作用之一就是通知编译器目标函数不会抛出异常，从而允许编译器进行性能优化。不过，这只是 noexcept 的一个主要功能，它还有其他方面的作用，例如提升代码的安全性和健壮性。
+try {
+    throw 42;                // 抛出整数
+    throw std::string("Error occurred"); // 抛出字符串
+} catch (int e) {
+    std::cout << "Caught integer: " << e << std::endl;
+} catch (std::string& e) {
+    std::cout << "Caught string: " << e << std::endl;
+}
+c++异常catch块中声明引用是为了防止对象切割。
+
+
+什么是对象切割（Object Slicing）？
+对象切割是指将派生类对象赋值给基类对象时，基类对象只保留了基类部分的数据，而丢失了派生类的特性（如派生类的成员变量和虚函数行为）。
+Base baseObj = derivedObj; 会调用 Base 的拷贝构造函数。
+	•	Base 的拷贝构造函数只会复制 Base 部分的数据，而派生类 Derived 的部分（包括 extra 和重写的 print() 方法）被切割。
+	•	导致 baseObj.print() 调用的是基类的 print()，而不是派生类的重写版本。
+而指针和引用变量则不会。
+
+
