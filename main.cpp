@@ -393,7 +393,7 @@ int main(int argc, char *argv[]) {
             // 唯一指针
             unique_ptr<User1> u1 = make_unique<User1>();
             // 转让所有权
-            unique_ptr<User1> u2 = move(u1);
+            unique_ptr<User1> u2 = std::move(u1);
             cout << format("u1==null:{}", u1 == nullptr) << endl;
 
             // 共享指针
@@ -481,7 +481,7 @@ int main(int argc, char *argv[]) {
 
             User1(int id, int size): id(new int(id)), accounts(new string *[size]), size(size), u2(new User2) {
                 for (int i = 0; i < size; i++) {
-                    accounts[i] = new string("admin-" + i);
+                    accounts[i] = new string(format("admin-{}", i));
                 }
                 cout << "User1 init..." << endl;
             }

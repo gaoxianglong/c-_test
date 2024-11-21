@@ -115,4 +115,9 @@ Base baseObj = derivedObj; 会调用 Base 的拷贝构造函数。
 	•	导致 baseObj.print() 调用的是基类的 print()，而不是派生类的重写版本。
 而指针和引用变量则不会。
 
+内存错误排查
+在完成代码编写后，使用 AddressSanitizer（ASan）等工具对代码进行内存错误检测(空指针、悬垂指针、数组越界)是非常好的习惯
+AddressSanitizer（Asan）：支持GCC/CLANG
+g++ -std=c++20 -fsanitize=address -g -o rlt *.cpp
+
 
