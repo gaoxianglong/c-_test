@@ -663,22 +663,26 @@ int main(int argc, char *argv[]) {
             string msg;
 
         public:
-            MyException1(const string msg) : msg(msg) {
+            MyException1(const string &msg) : msg(msg) {
             }
 
-            MyException1(const string msg, const std::exception &e) {
+            MyException1(const string &msg, const std::exception &e) {
                 this->msg = format("{}:{}", msg, e.what());
+            }
+
+            /**
+             * 继承std::exception需要重写what函数
+             */
+            const char *what() const noexcept override {
+                return msg.c_str();
             }
         };
         class MyException2 : public std::logic_error {
-            string msg;
-
         public:
-            MyException2(const string msg) : logic_error(msg), msg(msg) {
+            MyException2(const string &msg) : logic_error(msg) {
             }
 
-            MyException2(const string msg, const std::exception &e): logic_error(msg) {
-                this->msg = format("{}:{}", msg, e.what());
+            MyException2(const string &msg, const std::exception &e): logic_error(format("{}:{}", msg, e.what())) {
             }
         };
 
