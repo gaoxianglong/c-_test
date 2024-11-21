@@ -120,4 +120,7 @@ Base baseObj = derivedObj; 会调用 Base 的拷贝构造函数。
 AddressSanitizer（Asan）：支持GCC/CLANG
 g++ -std=c++20 -fsanitize=address -g -o rlt *.cpp
 
+左值、右值问题
+这个问题是由于试图将一个右值（如临时对象或返回值）绑定到一个 非 const 的左值引用 导致的。右值不能直接绑定到非 const 引用，这是 C++ 的一个规则
+
 
