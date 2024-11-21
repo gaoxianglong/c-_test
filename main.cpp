@@ -711,6 +711,32 @@ int main(int argc, char *argv[]) {
             }
         }
     }
+    // 左值和右值
+    {
+        // 非const左值引用只能绑定左值
+        {
+            int a = 10;
+            int &b = a;
+            // Non-const lvalue reference 'c' to type int cannot bind to rvalue of type int
+            //int &c = 10;
+            cout << format("a:{},b:{}", a, b) << endl;
+        }
+        // const左值引用可以绑定左值和右值
+        {
+            int a = 10;
+            const int &b = a;
+            const int &c = 10;
+            cout << format("a:{},b:{},c:{}", a, b, c) << endl;
+        }
+        // 右值引用只能绑定右值
+        {
+            int a = 10;
+            int &&b = 123;
+            // Rvalue reference 'c' to type int cannot bind to lvalue of type int
+            //int &&c = a;
+            cout << format("a:{},b:{}", a, b) << endl;
+        }
+    }
     return 0;
 }
 
