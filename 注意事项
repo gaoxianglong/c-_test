@@ -80,17 +80,20 @@ exception是异常基类，如果抛出的话，构造函数没有任何参数�
 	2.	如果异常是因为外部条件（例如文件、网络、用户输入等），选择 std::runtime_error。
 	•	运行时错误意味着需要在运行时捕获并处理。
 c++任何类型的异常都不需要强制捕获，他们仅仅只是语义上的差异。
-class MyException : public std::exception {
+class MyException1 : public std::exception {
     string msg;
 
 public:
-    MyException(string str) : msg(str) {
+    MyException1(const string &msg) : msg(msg) {
     }
 
-    MyException(string msg, std::exception &e) {
-        this->msg = msg + ":" + string(e.what());
+    MyException1(const string &msg, const std::exception &e) {
+        this->msg = format("{}:{}", msg, e.what());
     }
 
+    /**
+     * 继承std::exception需要重写what函数
+     */
     const char *what() const noexcept override {
         return msg.c_str();
     }
@@ -100,9 +103,9 @@ noexcept 的主要作用之一就是通知编译器目标函数不会抛出异�
 try {
     throw 42;                // 抛出整数
     throw std::string("Error occurred"); // 抛出字符串
-} catch (int e) {
+} catch (const int& e) {
     std::cout << "Caught integer: " << e << std::endl;
-} catch (std::string& e) {
+} catch (const std::string& e) {
     std::cout << "Caught string: " << e << std::endl;
 }
 c++异常catch块中声明引用是为了防止对象切割。
