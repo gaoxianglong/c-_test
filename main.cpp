@@ -736,6 +736,27 @@ int main(int argc, char *argv[]) {
             //int &&c = a;
             cout << format("a:{},b:{}", a, b) << endl;
         }
+        // 自动类型推断
+        {
+            class User1 {
+            public:
+                void exe() {
+                    auto arr = {1, 2, 3, 4, 5};
+                    for (auto a: arr) {
+                        cout << format("a:{}", a) << endl;
+                    }
+                }
+
+                auto getId(any id) {
+                    auto id2 = 10;
+                    return any_cast<int>(id) + id2;
+                }
+            };
+
+            User1 user1;
+            user1.exe();
+            cout << format("id:{}", user1.getId(12)) << endl;
+        }
     }
     return 0;
 }
