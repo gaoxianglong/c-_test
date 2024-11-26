@@ -94,6 +94,8 @@ union Data {
     long b;
 };
 
+auto age = 20;
+
 int add(int a, int b);
 
 int mul(int a, int b);
@@ -755,7 +757,7 @@ int main(int argc, char *argv[]) {
 
             User1 user1;
             user1.exe();
-            cout << format("id:{}", user1.getId(12)) << endl;
+            cout << format("id:{},age:{}", user1.getId(12), age) << endl;
         }
     }
     return 0;
