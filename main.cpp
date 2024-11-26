@@ -760,6 +760,74 @@ int main(int argc, char *argv[]) {
             cout << format("id:{},age:{}", user1.getId(12), age) << endl;
         }
     }
+    // 强制类型转换
+    {
+        // 原数数据类型转换
+        {
+            // c语法
+            {
+                long a = 100;
+                int b = (int) a;
+                cout << format("a:{},b:{}", a, b) << endl;
+            }
+
+            // c++语法
+            {
+                long a = 100;
+                int b = static_cast<int>(a);
+                cout << format("a:{},b:{}", a, b) << endl;
+            }
+        }
+        // 基类和派生类之间的强制类型转换
+        {
+            class User1 {
+            public:
+                virtual void exe() {
+                    cout << "User1::exe()" << endl;
+                }
+            };
+            class User2 : public User1 {
+            public:
+                void exe() override {
+                    cout << "User2::exe()" << endl;
+                }
+            };
+            User1 *u1 = new User2;
+            User2 *u2 = dynamic_cast<User2 *>(u1);
+            delete u1;
+        }
+        // 编译器不做类型安全检查
+        {
+            long *a = new long(10);
+            int *b = reinterpret_cast<int *>(a);
+            cout << format("a:{},b:{}", *a, *b) << endl;
+            delete a;
+
+            User1 u1;
+            User1 &u2 = u1;
+            User1 &u3 = reinterpret_cast<User1 &>(u2);
+            u3.exe();
+
+            // 将内存地址转为对象指针
+            {
+                cout << "<<<" << endl;
+                User1 *u1 = new User1;
+                // uintptr_t是一种专门用于保存指针（内存地址）的数据类型
+                uintptr_t address = reinterpret_cast<uintptr_t>(u1);
+                User1 *u2 = reinterpret_cast<User1 *>(address);
+                u2->exe();
+                cout << format("uintptr_t size:{}", sizeof(uintptr_t)) << endl;
+            }
+            // 修改const变量的值
+            {
+                const int a = 100;
+                cout << format("before a:{}", a) << endl;
+                int *b = const_cast<int *>(&a);
+                *b = 20;
+                cout << format("after a:{}", a) << endl;
+            }
+        }
+    }
     return 0;
 }
 
