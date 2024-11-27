@@ -11,14 +11,26 @@
 using namespace c_test;
 using namespace std;
 
-
+/**
+ * 使用ADL访问
+ */
 namespace adl::test {
-    void exe() {
-        cout << "adl test..." << endl;
+    /**
+     * 贫血模型
+     */
+    struct UserVO {
+        int id;
+        string name;
+
+        UserVO(int id, string name): id(id), name(name) {
+        }
+    };
+
+    void exe(UserVO userVO) {
+        cout << format("id:{},name:{}", userVO.id, userVO.name) << endl;
     }
 }
 
-//using namespace adl::test;
 class User1 {
 public:
     string name;
@@ -172,6 +184,33 @@ string getNumber(string num1, string num2) {
 
 string getNumber() {
     return "123";
+}
+
+struct MyData {
+    int id;
+    string name;
+
+    MyData(int id, string name): id(id), name(name) {
+    }
+
+    int getId() const {
+        return id;
+    }
+
+    string getName() const {
+        return name;
+    }
+};
+
+/**
+ * 重载<<运算符
+ * @param cout
+ * @param user1 
+ * @return 
+ */
+std::ostream &operator<<(std::ostream &cout, const MyData &data) {
+    cout << format("id:{},name:{}", data.getId(), data.getName());
+    return cout;
 }
 
 int main(int argc, char *argv[]) {
@@ -864,10 +903,19 @@ int main(int argc, char *argv[]) {
         //     cout << format("b:{}", *b) << endl;
         // }
     }
-    //
+    // ADL
     {
+        // 编译器会根据所属命名空间的参数类型查找到指定的目标函数
+        exe(adl::test::UserVO(1, "admin123"));
+
+        // 当不想引入整个命名空间时，可以通过using单独引入某个命名空间的成员来降低命名冲突问题
         using adl::test::exe;
-        exe();
+        exe(adl::test::UserVO(2, "admin321"));
+    }
+    // 重载运算符
+    {
+        MyData data(1, "data...");
+        std::cout << data << endl;
     }
     return 0;
 }
