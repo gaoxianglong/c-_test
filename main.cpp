@@ -12,6 +12,13 @@ using namespace c_test;
 using namespace std;
 
 
+namespace adl::test {
+    void exe() {
+        cout << "adl test..." << endl;
+    }
+}
+
+//using namespace adl::test;
 class User1 {
 public:
     string name;
@@ -827,6 +834,40 @@ int main(int argc, char *argv[]) {
                 cout << format("after a:{}", a) << endl;
             }
         }
+    }
+    // 未定义行为（UB）
+    {
+        // 访问未初始化变量
+        {
+            // a的值不会等于0，值是任意的，可能来源于之前内存位遗留的内容
+            int aa;
+            int b = 2 + aa;
+            cout << format("aa:{},b:{}", aa, b) << endl;
+        }
+        // // 访问空指针
+        // {
+        //     int *a = nullptr;
+        //     int b = *a;
+        //     cout << b << endl;
+        // }
+        // // 数组越界访问
+        // {
+        //     int arr[5] = {1, 2, 3, 4, 5};
+        //     cout << format("arr[5]:{}", arr[5]) << endl;
+        // }
+        // 悬垂指针
+        // {
+        //     int *a = new int(1);
+        //     cout << format("a:{}", *a) << endl;
+        //     int *b = a;
+        //     delete a;
+        //     cout << format("b:{}", *b) << endl;
+        // }
+    }
+    //
+    {
+        using adl::test::exe;
+        exe();
     }
     return 0;
 }
