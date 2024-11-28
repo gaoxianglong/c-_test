@@ -825,6 +825,7 @@ int main(int argc, char *argv[]) {
             // 没有运行时检查，可能会出现未定义行为导致程序崩溃
             User2 *u2 = static_cast<User2 *>(u1);
             u2->exe();
+            delete u1;
         }
         // 动态转换
         {
@@ -837,6 +838,7 @@ int main(int argc, char *argv[]) {
                 } else {
                     cout << format("User1 2 User2类型转换错误") << endl;
                 }
+                delete u1;
             }
             // 引用转换
             {
@@ -859,6 +861,7 @@ int main(int argc, char *argv[]) {
             // 内存地址转为指针
             User1 *u2 = reinterpret_cast<User1 *>(address);
             u2->exe();
+            delete u1;
         }
         // const_case
         {
