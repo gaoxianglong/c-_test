@@ -11,6 +11,25 @@
 using namespace c_test;
 using namespace std;
 
+/**
+ * 使用ADL访问
+ */
+namespace adl::test {
+    /**
+     * 贫血模型
+     */
+    struct UserVO {
+        int id;
+        string name;
+
+        UserVO(int id, string name): id(id), name(name) {
+        }
+    };
+
+    void exe(UserVO userVO) {
+        cout << format("id:{},name:{}", userVO.id, userVO.name) << endl;
+    }
+}
 
 class User1 {
 public:
@@ -94,6 +113,8 @@ union Data {
     long b;
 };
 
+auto age = 20;
+
 int add(int a, int b);
 
 int mul(int a, int b);
@@ -147,6 +168,50 @@ struct User2VO : public UserVO {
         cout << "User2VO exe" << endl;
     }
 };
+
+/**
+ * 函数重载
+ * @param num
+ * @return
+ */
+string getNumber(string num) {
+    return num;
+}
+
+string getNumber(string num1, string num2) {
+    return num1 + num2;
+}
+
+string getNumber() {
+    return "123";
+}
+
+struct MyData {
+    int id;
+    string name;
+
+    MyData(int id, string name): id(id), name(name) {
+    }
+
+    int getId() const {
+        return id;
+    }
+
+    string getName() const {
+        return name;
+    }
+};
+
+/**
+ * 重载<<运算符
+ * @param cout
+ * @param user1
+ * @return
+ */
+std::ostream &operator<<(std::ostream &cout, const MyData &data) {
+    cout << format("id:{},name:{}", data.getId(), data.getName());
+    return cout;
+}
 
 int main(int argc, char *argv[]) {
     // 查看C++的版本
@@ -376,7 +441,7 @@ int main(int argc, char *argv[]) {
             // 唯一指针
             unique_ptr<User1> u1 = make_unique<User1>();
             // 转让所有权
-            unique_ptr<User1> u2 = move(u1);
+            unique_ptr<User1> u2 = std::move(u1);
             cout << format("u1==null:{}", u1 == nullptr) << endl;
 
             // 共享指针
@@ -464,7 +529,7 @@ int main(int argc, char *argv[]) {
 
             User1(int id, int size): id(new int(id)), accounts(new string *[size]), size(size), u2(new User2) {
                 for (int i = 0; i < size; i++) {
-                    accounts[i] = new string("admin-" + i);
+                    accounts[i] = new string(format("admin-{}", i));
                 }
                 cout << "User1 init..." << endl;
             }
@@ -569,6 +634,8 @@ int main(int argc, char *argv[]) {
             User1 u1(1, 2);
             User1 u2(2, 2);
             u1 = u2;
+            cout << format("u1.id=2:{},u1.&id:{:p},u2.&id:{}", *u1.id == 2, static_cast<void *>(u1.id),
+                           static_cast<void *>(u2.id)) << endl;
         }
         //
         {
@@ -586,6 +653,268 @@ int main(int argc, char *argv[]) {
             cout << format("u1.id==null:{},u1,account==null:{}", (u1.id == nullptr), (u1.accounts == nullptr)) << endl;
         }
     }
+
+    // 函数重载
+    {
+        cout << format("number:{}", getNumber()) << endl;
+        cout << format("number:{}", getNumber("123456")) << endl;
+        cout << format("number:{}", getNumber("222", "333")) << endl;
+    }
+
+    // 多重继承
+    {
+        class User1 {
+        public:
+            string getName() {
+                return "user1";
+            }
+        };
+        class User2 {
+        public:
+            string getName() {
+                return "user2";
+            }
+        };
+        class User3 : public User2, public User1 {
+        public:
+            string getName() {
+                return User1::getName() + "-" + User2::getName();
+            }
+        };
+
+        cout << "<<<" << endl;
+        User3 user3;
+        cout << format("name:{}", user3.getName()) << endl;
+    }
+    // 虚拟继承
+    {
+        class UserA {
+        public:
+            string getName() {
+                return "admin";
+            }
+        };
+
+        class UserB : virtual public UserA {
+        };
+        class UserC : virtual public UserA {
+        };
+        class UserD : public UserC, public UserB {
+        };
+
+        UserD userD;
+        cout << format("name:{}", userD.getName()) << endl;
+    }
+    // 异常处理
+    {
+        class MyException1 : public std::exception {
+            string msg;
+
+        public:
+            MyException1(const string &msg) : msg(msg) {
+            }
+
+            MyException1(const string &msg, const std::exception &e) {
+                this->msg = format("{}:{}", msg, e.what());
+            }
+
+            /**
+             * 继承std::exception需要重写what函数
+             */
+            const char *what() const noexcept override {
+                return msg.c_str();
+            }
+        };
+        class MyException2 : public std::logic_error {
+        public:
+            MyException2(const string &msg) : logic_error(msg) {
+            }
+
+            MyException2(const string &msg, const std::exception &e): logic_error(format("{}:{}", msg, e.what())) {
+            }
+        };
+
+        //
+        {
+            try {
+                //throw 1;
+                //throw MyException1("MyException1");
+                throw MyException2("MyException2", MyException1("MyException1"));
+                //throw "other exception";
+            } catch (const int &e) {
+                cout << format("int exception:{}", e) << endl;
+            }
+            catch (const MyException1 &e) {
+                cout << format("MyException1:{}", e.what()) << endl;
+            } catch (const MyException2 &e) {
+                cout << format("MyException2:{}", e.what()) << endl;
+            }
+            catch (const std::logic_error &e) {
+                cout << format("logic_error:{}", e.what()) << endl;
+            }
+            catch (const std::exception &e) {
+                cout << format("std::exception:{}", e.what()) << endl;
+            } catch (...) {
+                cout << "other exception" << endl;
+            }
+        }
+    }
+    // 左值和右值
+    {
+        // 非const左值引用只能绑定左值
+        {
+            int a = 10;
+            int &b = a;
+            // Non-const lvalue reference 'c' to type int cannot bind to rvalue of type int
+            //int &c = 10;
+            cout << format("a:{},b:{}", a, b) << endl;
+        }
+        // const左值引用可以绑定左值和右值
+        {
+            int a = 10;
+            const int &b = a;
+            const int &c = 10;
+            cout << format("a:{},b:{},c:{}", a, b, c) << endl;
+        }
+        // 右值引用只能绑定右值
+        {
+            int a = 10;
+            int &&b = 123;
+            // Rvalue reference 'c' to type int cannot bind to lvalue of type int
+            //int &&c = a;
+            cout << format("a:{},b:{}", a, b) << endl;
+        }
+        // 自动类型推断
+        {
+            class User1 {
+            public:
+                void exe() {
+                    auto arr = {1, 2, 3, 4, 5};
+                    for (auto a: arr) {
+                        cout << format("a:{}", a) << endl;
+                    }
+                }
+
+                auto getId(any id) {
+                    auto id2 = 10;
+                    return any_cast<int>(id) + id2;
+                }
+            };
+
+            User1 user1;
+            user1.exe();
+            cout << format("id:{},age:{}", user1.getId(12), age) << endl;
+        }
+    }
+    // 强制类型转换
+    {
+        // c语法转换
+        {
+            long a = 100;
+            int b = (int) a;
+            cout << format("a:{},b:{}", a, b) << endl;
+        }
+        // 静态转换
+        {
+            cout << "<<<" << endl;
+            long a = 100;
+            int b = static_cast<int>(a);
+            cout << format("a:{},b:{}", a, b) << endl;
+
+            User1 *u1 = new User1;
+            // 没有运行时检查，可能会出现未定义行为导致程序崩溃
+            User2 *u2 = static_cast<User2 *>(u1);
+            u2->exe();
+            delete u1;
+        }
+        // 动态转换
+        {
+            // 指针转换
+            {
+                User1 *u1 = new User2;
+                User2 *u2 = dynamic_cast<User2 *>(u1);
+                if (u2) {
+                    u2->exe();
+                } else {
+                    cout << format("User1 2 User2类型转换错误") << endl;
+                }
+                delete u1;
+            }
+            // 引用转换
+            {
+                try {
+                    User1 u1;
+                    User2 &u2 = dynamic_cast<User2 &>(u1);
+                    u2.exe();
+                } catch (const std::bad_cast &e) {
+                    // 动态转换的时候，如果是引用类型转换失败则会抛bad_case异常
+                    cout << format("error:{}", e.what()) << endl;
+                }
+            }
+        }
+        // reinterpret_cast转换
+        {
+            User1 *u1 = new User1;
+            // 获取指针指向的内存地址
+            uintptr_t address = reinterpret_cast<uintptr_t>(u1);
+            cout << "u1:" << u1 << "\taddress:" << hex << address << endl;
+            // 内存地址转为指针
+            User1 *u2 = reinterpret_cast<User1 *>(address);
+            u2->exe();
+            delete u1;
+        }
+        // const_case
+        {
+            const int a = 100;
+            int *b = const_cast<int *>(&a);
+            *b = 20;
+            cout << format("a:{},b:{}", a, *b) << endl;
+        }
+    }
+    // 未定义行为（UB）
+    {
+        // 访问未初始化变量
+        {
+            // a的值不会等于0，值是任意的，可能来源于之前内存位遗留的内容
+            int aa;
+            int b = 2 + aa;
+            cout << format("aa:{},b:{}", aa, b) << endl;
+        }
+        // // 访问空指针
+        // {
+        //     int *a = nullptr;
+        //     int b = *a;
+        //     cout << b << endl;
+        // }
+        // // 数组越界访问
+        // {
+        //     int arr[5] = {1, 2, 3, 4, 5};
+        //     cout << format("arr[5]:{}", arr[5]) << endl;
+        // }
+        // 悬垂指针
+        // {
+        //     int *a = new int(1);
+        //     cout << format("a:{}", *a) << endl;
+        //     int *b = a;
+        //     delete a;
+        //     cout << format("b:{}", *b) << endl;
+        // }
+    }
+    // ADL
+    {
+        // 编译器会根据所属命名空间的参数类型查找到指定的目标函数
+        exe(adl::test::UserVO(1, "admin123"));
+
+        // 当不想引入整个命名空间时，可以通过using单独引入某个命名空间的成员来降低命名冲突问题
+        using adl::test::exe;
+        exe(adl::test::UserVO(2, "admin321"));
+    }
+    // 重载运算符
+    {
+        MyData data(1, "data...");
+        std::cout << data << endl;
+    }
+    cout << "==== end ====" << endl;
     return 0;
 }
 
