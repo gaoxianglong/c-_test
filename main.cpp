@@ -914,6 +914,49 @@ int main(int argc, char *argv[]) {
         MyData data(1, "data...");
         std::cout << data << endl;
     }
+    // 宏
+    {
+        // 常量宏
+        {
+#define ID 123
+#define NAME "JohnGao"
+            cout << format("id:{},name:{}",ID,NAME) << endl;
+            int id = ID;
+            string name = NAME;
+            cout << format("id:{},name:{}", id, name) << endl;
+        }
+        // 函数宏
+        {
+            // 带返回值的函数宏
+#define ADD(a,b)(a+b)
+            cout << format("add:{}",ADD(1, 2)) << endl;
+            // 不带返回值的函数宏
+#define PRINT_NAME(fn,ln)do{\
+    cout<<"first name:"<<fn<<endl;\
+    cout<<"last name:"<<ln<<endl;\
+}while(0)
+            PRINT_NAME("John", "Gao");
+        }
+        // 条件编译
+        {
+            // 定义宏
+#define NUM 10
+            // 条件编译
+#if NUM > 10
+    cout << "NUM > 10" << endl;
+#else
+            cout << "NUM <= 10" << endl;
+#endif
+
+#ifdef __APPLE__
+            cout << "__APPLE__" << endl;
+#elif defined(_WIN32)
+            cout << "_WIN32" << endl;
+#elif defined(__linux__)
+            cout << "__linux__" << endl;
+#endif
+        }
+    }
 
     cout << "==== end ====" << endl;
     return 0;
