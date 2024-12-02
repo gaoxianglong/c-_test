@@ -5,4 +5,5 @@ set(CMAKE_CXX_STANDARD 20)
 
 add_executable(c__test main.cpp
         Account.cpp
-        Account.h)
+        Account.h
+)
