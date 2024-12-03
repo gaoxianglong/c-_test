@@ -4,6 +4,9 @@
 #include <format>
 #include <memory>
 #include <vector>
+#include <list>
+#include <set>
+#include <map>
 
 // 加了#idndef包含保护,多次定义会被忽略
 #include "Account.h"
@@ -956,6 +959,177 @@ int main(int argc, char *argv[]) {
             cout << "__linux__" << endl;
 #endif
         }
+    }
+
+    cout << "<<<" << endl;
+    // 数据结构
+    {
+        // 固定数组
+        {
+            std::array<int, 5> arr = {1, 2, 3, 4, 5};
+            for (auto a: arr) {
+                cout << format("固定数组:{}", a) << endl;
+            }
+
+            std::array<int, 5> arr2 = {1, 1, 1, 1, 1};
+            // 范围值替换
+            std::replace(arr2.begin(), arr2.end(), 1, 2);
+            for (auto a: arr2) {
+                cout << format("固定数组:{}", a) << endl;
+            }
+
+            cout << "<<<" << endl;
+            std::array<int, 5> arr3 = {2, 3, 4, 1, 100};
+            // 升序
+            std::sort(arr3.begin(), arr3.end());
+            for (auto a: arr3) {
+                cout << format("升序:{}", a) << endl;
+            }
+
+            // 二分查找
+            auto rlt = std::binary_search(arr3.begin(), arr3.end(), 100);
+            cout << "二分查找:" << (rlt ? "找到了" : "没找到") << endl;
+
+            // 降序
+            std::sort(arr3.begin(), arr3.end(), std::greater<>());
+            for (auto a: arr3) {
+                cout << format("降序:{}", a) << endl;
+            }
+        }
+        // 动态数组
+        {
+            cout << "<<<" << endl;
+            std::vector<int> arr;
+            // 指定位置写入数据
+            for (auto i = 0; i < 5; i++) {
+                arr.push_back(i);
+            }
+            arr[0] = 999;
+            for (auto a: arr) {
+                cout << format("动态数组:{}", a) << endl;
+            }
+            cout << format("size==5:{},arr[1]=1:{}", arr.size() == 5, arr[1] == 1) << endl;
+        }
+        // 双向链表
+        {
+            std::list<int> list;
+            for (auto i = 0; i < 10; i++) {
+                // 写入到队头
+                list.push_front(i);
+            }
+            // 指定位置写入数据
+            auto index = list.begin();
+            // 更新索引位
+            std::advance(index, 1);
+            list.insert(index, 999);
+            for (auto a: list) {
+                cout << format("双向链表:{}", a) << endl;
+            }
+            // 使用迭代器遍历
+            {
+                for (auto begin = list.begin(); begin != list.end(); begin++) {
+                    cout << format("双向链表:{}", *begin) << endl;
+                }
+            }
+
+            // 查看某个值是不是存在
+            auto it = std::find(list.begin(), list.end(), 200);
+            if (it == list.end()) {
+                cout << "没找到" << endl;
+            } else {
+                cout << "找到了" << endl;
+            }
+
+            list.clear();
+            cout << format("size==0:{}", list.size() == 0) << endl;
+        }
+
+        // 双端队列
+        {
+            std::deque<int> que;
+            for (auto i = 0; i < 5; i++) {
+                que.push_back(i);
+            }
+            auto size = que.size();
+            // 出队
+            for (auto i = 0; i < size; i++) {
+                cout << format("双端队列:{}", que.back()) << endl;
+                // 移除队尾元素
+                que.pop_back();
+            }
+            cout << format("que.size()==0:{}", que.size() == 0) << endl;
+        }
+        // 唯一集合
+        {
+            cout << "<<<" << endl;
+            std::set<int> keys;
+            for (int i = 0; i < 10; i++) {
+                keys.insert(i);
+            }
+            keys.insert(0);
+            cout << format("size==10:{}", keys.size() == 10) << endl;
+            for (auto k: keys) {
+                cout << format("唯一集合:{}", k) << endl;
+            }
+        }
+        // 键值对
+        {
+            std::map<std::string, std::string> my_map;
+            // 插入元素
+            my_map.insert({"key-1", "123"});
+            my_map["key-2"] = "234";
+            for (auto [k,v]: my_map) {
+                cout << format("key:{},value:{}", k, v) << endl;
+            }
+
+            // 使用find和count查找元素
+            {
+                auto it = my_map.find("key-1");
+                if (it != my_map.end()) {
+                    cout << format("find key:{},value:{}", it->first, it->second) << endl;
+                }
+
+                if (my_map.count("key-2")) {
+                    auto it = my_map.find("key-2");
+                    if (it != my_map.end()) {
+                        cout << format("find key:{},value:{}", it->first, it->second) << endl;
+                    }
+                }
+            }
+        }
+        // 栈
+        {
+            std::stack<int> s;
+            for (auto i = 0; i < 10; i++) {
+                s.push(i);
+            }
+            auto size = s.size();
+            for (auto i = 0; i < size; i++) {
+                cout << format("栈:{}", s.top()) << endl;
+                s.pop();
+            }
+            cout << format("s.size()==0:{}", s.size() == 0) << endl;
+        }
+        // FIFO:只能在队列的两端进行操作：从尾部插入，从头部取出
+        {
+            std::queue<int> que_;
+            for (auto i = 0; i < 10; i++) {
+                que_.push(i);
+            }
+            auto size = que_.size();
+            for (auto i = 0; i < size; i++) {
+                cout << format("FIFO:{}", que_.front()) << endl;
+                que_.pop();
+            }
+            cout << format("size==0:{}", que_.size() == 0) << endl;
+        }
+    }
+    // iostream
+    {
+        // 无缓冲，立即写入
+        std::cerr << "error" << endl;
+        // 有缓冲，延迟写入
+        std::clog << "error2" << endl;
     }
 
     cout << "==== end ====" << endl;

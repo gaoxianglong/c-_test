@@ -292,3 +292,21 @@ defined	检查宏是否已定义，用于复杂条件表达式中
 推荐使用全大写的命名规则，以表明这是用户定义的宏。
 如果需要加命名空间，可以使用 _ 分隔单词或加入前缀。
 不要定义以 _ 或 __ 开头的宏，因为这些名称可能与标准库或编译器实现冲突。
+
+数据结构
+固定数组：std::array<int,5> arr;
+动态数组，线性表std::vector<int> arr;
+双向链表：std:list<int> array;
+双端队列:std::deque<int> que_;
+唯一集合:std::set<int> s;
+键值对:std::map<int,std::string> maps;
+栈:std::stack<int> s;
+双端队列&先进先出:std::queue que_;
+
+迭代器
+每个容器都有自己的迭代器类型，可用于遍历元素和修改值。最常见的迭代器操作是和begin()，end()分别用于获取指向容器的第一个元素和最后一个元素之后的迭代器。
+std::vector<int> my_vec = {1, 2, 3, 4, 5};
+for(auto it = my_vec.begin(); it != my_vec.end(); ++it) {
+    std::cout << *it << " ";
+}
+
