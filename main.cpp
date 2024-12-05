@@ -10,9 +10,12 @@
 
 // 加了#idndef包含保护,多次定义会被忽略
 #include "Account.h"
+#include <chrono>
+#include <iomanip>
 
 using namespace c_test;
 using namespace std;
+using namespace chrono;
 
 /**
  * 使用ADL访问
@@ -935,8 +938,8 @@ int main(int argc, char *argv[]) {
             cout << format("add:{}",ADD(1, 2)) << endl;
             // 不带返回值的函数宏
 #define PRINT_NAME(fn,ln)do{\
-    cout<<"first name:"<<fn<<endl;\
-    cout<<"last name:"<<ln<<endl;\
+cout<<"first name:"<<fn<<endl;\
+cout<<"last name:"<<ln<<endl;\
 }while(0)
             PRINT_NAME("John", "Gao");
         }
@@ -946,7 +949,7 @@ int main(int argc, char *argv[]) {
 #define NUM 10
             // 条件编译
 #if NUM > 10
-    cout << "NUM > 10" << endl;
+            cout << "NUM > 10" << endl;
 #else
             cout << "NUM <= 10" << endl;
 #endif
@@ -1130,6 +1133,26 @@ int main(int argc, char *argv[]) {
         std::cerr << "error" << endl;
         // 有缓冲，延迟写入
         std::clog << "error2" << endl;
+    }
+    // Date
+    {
+        // 将时间戳转换为日期
+        {
+            auto now_ = system_clock::now();
+            auto seconds = chrono::duration_cast<chrono::seconds>(now_.time_since_epoch()).count();
+            auto t_seconds = static_cast<time_t>(seconds);
+            ostringstream os;
+            os << put_time(std::localtime(&t_seconds), "%Y-%m-%d %H:%M:%S");
+            cout << format("data:{}", os.str()) << endl;
+        }
+        // 指定日期加N天
+        {
+            auto ymd = 2024y / 2 / 12;
+            sys_days days_ = ymd;
+            days_ += chrono::days(2);
+            ymd = year_month_day(days_);
+            cout << format("data:{}", ymd) << endl;
+        }
     }
 
     cout << "==== end ====" << endl;

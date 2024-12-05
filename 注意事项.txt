@@ -298,7 +298,7 @@ defined	检查宏是否已定义，用于复杂条件表达式中
 动态数组，线性表std::vector<int> arr;
 双向链表：std:list<int> array;
 双端队列:std::deque<int> que_;
-唯一集合:std::set<int> s;
+唯一集合:std::set<int> s;（基于红黑树的实现）
 键值对:std::map<int,std::string> maps;
 栈:std::stack<int> s;
 双端队列&先进先出:std::queue que_;
@@ -309,4 +309,21 @@ std::vector<int> my_vec = {1, 2, 3, 4, 5};
 for(auto it = my_vec.begin(); it != my_vec.end(); ++it) {
     std::cout << *it << " ";
 }
+通过迭代器迭代元素并同时删除时，返回的迭代器更新当前迭代器：
+    std::list<int> arr = {1, 2, 3, 4, 5};
+    for (auto i = arr.begin(); i != arr.end();) {
+        if ((*i & 1) == 1) {
+            i = arr.erase(i);
+            continue;
+        }
+        i++;
+    }
+
+容器元素删除方式：
+容器类型	删除方式	                    示例
+list	remove, remove_if, erase	lst.remove(3); lst.remove_if(...); lst.erase(it);
+set	    erase(值), erase(迭代器)	    st.erase(3); st.erase(it);
+vector	erase(remove(...))	        vec.erase(std::remove(...), vec.end());
+array	不支持直接删除，需转为动态容器	转为 vector 后用 erase(std::remove(...)) 删除
+map	    erase(键), erase(迭代器)	    mp.erase(2); mp.erase(it);
 
