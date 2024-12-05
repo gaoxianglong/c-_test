@@ -26,9 +26,6 @@
     <list default="true" id="b69bdb95-ace7-438a-9e2a-b7903489091a" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/main.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/rlt" beforeDir="false" afterPath="$PROJECT_DIR$/rlt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/rlt.dSYM/Contents/Resources/DWARF/rlt" beforeDir="false" afterPath="$PROJECT_DIR$/rlt.dSYM/Contents/Resources/DWARF/rlt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/注意事项.txt" beforeDir="false" afterPath="$PROJECT_DIR$/注意事项.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,10 +42,6 @@
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/main.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="mock:///Users/johngao/Desktop/Desktop/project/c-_test/main.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="ProjectApplicationVersion">
     <option name="ide" value="CLion" />
@@ -103,6 +96,7 @@
       <workItem from="1732759313698" duration="1000" />
       <workItem from="1733101201689" duration="2668000" />
       <workItem from="1733216776025" duration="358000" />
+      <workItem from="1733387628750" duration="3349000" />
     </task>
     <servers />
   </component>

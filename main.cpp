@@ -223,6 +223,8 @@ int main(int argc, char *argv[]) {
     // 查看C++的版本
     std::cout << __cplusplus << std::endl;
 
+    //#define EXE
+#ifdef EXE
     // 基础
     {
         cout << "Please input:" << endl;
@@ -963,168 +965,191 @@ cout<<"last name:"<<ln<<endl;\
 #endif
         }
     }
+#endif
 
     cout << "<<<" << endl;
     // 数据结构
     {
         // 固定数组
         {
-            std::array<int, 5> arr = {1, 2, 3, 4, 5};
-            for (auto a: arr) {
-                cout << format("固定数组:{}", a) << endl;
+            std::array arr = {1, 2, 3, 4, 5};
+            // 迭代器遍历
+            for (auto i = arr.begin(); i != arr.end(); i++) {
+                cout << format("array:{}", *i) << endl;
             }
-
-            std::array<int, 5> arr2 = {1, 1, 1, 1, 1};
-            // 范围值替换
-            std::replace(arr2.begin(), arr2.end(), 1, 2);
-            for (auto a: arr2) {
-                cout << format("固定数组:{}", a) << endl;
-            }
-
             cout << "<<<" << endl;
-            std::array<int, 5> arr3 = {2, 3, 4, 1, 100};
-            // 升序
-            std::sort(arr3.begin(), arr3.end());
-            for (auto a: arr3) {
-                cout << format("升序:{}", a) << endl;
+            // for-each遍历
+            for (auto i: arr) {
+                cout << format("array:{}", i) << endl;
             }
-
+            cout << "<<<" << endl;
+            arr = {1, 1, 1, 1, 1};
+            // 范围值替换
+            std::replace(arr.begin(), arr.end(), 1, 2);
+            for (auto i: arr) {
+                cout << format("array:{}", i) << endl;
+            }
+            cout << "<<<" << endl;
+            arr = {10, 2, 31, 14, 15};
+            // 升序排序
+            std::sort(arr.begin(), arr.end());
+            for (auto i: arr) {
+                cout << format("array:{}", i) << endl;
+            }
+            // 降序排序
+            std::sort(arr.begin(), arr.end(), std::greater<int>());
+            for (auto i: arr) {
+                cout << format("array:{}", i) << endl;
+            }
+            cout << "<<<" << endl;
+            // 值查找
+            auto it = std::find(arr.begin(), arr.end(), 2);
+            if (it) {
+                cout << format("值:{}", *it) << endl;
+            } else {
+                cout << "未找到" << endl;
+            }
+            cout << "<<<" << endl;
+            arr = {1, 2, 3, 4, 5};
             // 二分查找
-            auto rlt = std::binary_search(arr3.begin(), arr3.end(), 100);
-            cout << "二分查找:" << (rlt ? "找到了" : "没找到") << endl;
-
-            // 降序
-            std::sort(arr3.begin(), arr3.end(), std::greater<>());
-            for (auto a: arr3) {
-                cout << format("降序:{}", a) << endl;
+            auto rlt = std::binary_search(arr.begin(), arr.end(), 2);
+            cout << format("查找结果:{}", rlt) << endl;
+            // 删除指定元素
+            std::vector<int> v = vector<int>(arr.begin(), arr.end());
+            v.erase(std::remove(v.begin(), v.end(), 5), v.end());
+            for (auto i: v) {
+                cout << format("array:{}", i) << endl;
+            }
+            cout << "<<<" << endl;
+            // 删除迭代器
+            for (auto i = v.begin(); i != v.end();) {
+                if ((*i & 1) == 1) {
+                    i = v.erase(i);
+                    continue;
+                }
+                i++;
+            }
+            for (auto i: v) {
+                cout << format("array:{}", i) << endl;
             }
         }
         // 动态数组
         {
             cout << "<<<" << endl;
-            std::vector<int> arr;
-            // 指定位置写入数据
-            for (auto i = 0; i < 5; i++) {
-                arr.push_back(i);
+            std::vector<int> arr = {1, 2, 3, 4, 5};
+            arr.push_back(6);
+            arr.push_back(7);
+            arr[0] = 100;
+            for (auto i: arr) {
+                cout << format("vector:{}", i) << endl;
             }
-            arr[0] = 999;
-            for (auto a: arr) {
-                cout << format("动态数组:{}", a) << endl;
+            cout << "<<<" << endl;
+            arr.erase(std::remove(arr.begin(), arr.end(), 7), arr.end());
+            for (auto i: arr) {
+                cout << format("vector:{}", i) << endl;
             }
-            cout << format("size==5:{},arr[1]=1:{}", arr.size() == 5, arr[1] == 1) << endl;
         }
         // 双向链表
         {
-            std::list<int> list;
-            for (auto i = 0; i < 10; i++) {
-                // 写入到队头
-                list.push_front(i);
+            cout << "<<<" << endl;
+            std::list<int> list_ = {1, 2, 3, 4, 5};
+            // 头尾插入数据
+            list_.push_back(6);
+            list_.push_front(0);
+            for (auto i: list_) {
+                cout << format("list:{}", i) << endl;
             }
-            // 指定位置写入数据
-            auto index = list.begin();
-            // 更新索引位
+            cout << "<<<" << endl;
+            // 指定索引位插入数据
+            auto index = list_.begin();
             std::advance(index, 1);
-            list.insert(index, 999);
-            for (auto a: list) {
-                cout << format("双向链表:{}", a) << endl;
+            list_.insert(index, 999);
+            for (auto i: list_) {
+                cout << format("list:{}", i) << endl;
             }
-            // 使用迭代器遍历
-            {
-                for (auto begin = list.begin(); begin != list.end(); begin++) {
-                    cout << format("双向链表:{}", *begin) << endl;
-                }
+            // 删除指定数据
+            list_.remove(999);
+            auto it = std::find(list_.begin(), list_.end(), 999);
+            if (it == list_.end()) {
+                cout << "未找到" << endl;
             }
-
-            // 查看某个值是不是存在
-            auto it = std::find(list.begin(), list.end(), 200);
-            if (it == list.end()) {
-                cout << "没找到" << endl;
-            } else {
-                cout << "找到了" << endl;
-            }
-
-            list.clear();
-            cout << format("size==0:{}", list.size() == 0) << endl;
         }
-
         // 双端队列
         {
-            std::deque<int> que;
-            for (auto i = 0; i < 5; i++) {
-                que.push_back(i);
+            cout << "<<<" << endl;
+            std::deque<int> que_ = {1, 2, 3, 4, 5};
+            // 插入到队头和队尾
+            que_.push_back(6);
+            que_.push_front(0);
+            while (!que_.empty()) {
+                cout << format("deque:{}", que_.front()) << endl;
+                // 移除队头元素
+                que_.pop_front();
             }
-            auto size = que.size();
-            // 出队
-            for (auto i = 0; i < size; i++) {
-                cout << format("双端队列:{}", que.back()) << endl;
-                // 移除队尾元素
-                que.pop_back();
-            }
-            cout << format("que.size()==0:{}", que.size() == 0) << endl;
+            cout << format("que_.empty=null:{}", que_.empty()) << endl;
         }
-        // 唯一集合
+        // 唯一集合(红黑树)
         {
             cout << "<<<" << endl;
-            std::set<int> keys;
-            for (int i = 0; i < 10; i++) {
-                keys.insert(i);
+            std::set<int> set_ = {1, 2, 3, 4, 5};
+            set_.insert(1);
+            set_.insert(2);
+            set_.insert(-1);
+            for (auto i: set_) {
+                cout << format("set:{}", i) << endl;
             }
-            keys.insert(0);
-            cout << format("size==10:{}", keys.size() == 10) << endl;
-            for (auto k: keys) {
-                cout << format("唯一集合:{}", k) << endl;
+            set_.erase(-1);
+            // if (std::find(set_.begin(), set_.end(), -1) == set_.end()) {
+            //     cout << "未找到" << endl;
+            // }
+            if (!set_.contains(-1)) {
+                cout << "未找到" << endl;
             }
         }
         // 键值对
         {
-            std::map<std::string, std::string> my_map;
-            // 插入元素
-            my_map.insert({"key-1", "123"});
-            my_map["key-2"] = "234";
-            for (auto [k,v]: my_map) {
-                cout << format("key:{},value:{}", k, v) << endl;
+            cout << "<<<" << endl;
+            std::map<string, string> map_;
+            map_.insert({"k-1", "v-1"});
+            map_["k-2"] = "v-2";
+            for (auto i: map_) {
+                cout << format("map:{}", i.second) << endl;
             }
-
-            // 使用find和count查找元素
-            {
-                auto it = my_map.find("key-1");
-                if (it != my_map.end()) {
-                    cout << format("find key:{},value:{}", it->first, it->second) << endl;
-                }
-
-                if (my_map.count("key-2")) {
-                    auto it = my_map.find("key-2");
-                    if (it != my_map.end()) {
-                        cout << format("find key:{},value:{}", it->first, it->second) << endl;
-                    }
-                }
+            if (map_.contains("k-1")) {
+                cout << "contains k-1" << endl;
+                auto it = map_.find("k-1");
+                cout << format("k:{},v:{}", it->first, it->second) << endl;
             }
+            map_.erase("k-1");
+            cout << format("size==1:{}", map_.size() == 1) << endl;
         }
         // 栈
         {
-            std::stack<int> s;
-            for (auto i = 0; i < 10; i++) {
-                s.push(i);
+            cout << "<<<" << endl;
+            std::stack<int> stack_;
+            stack_.push(1);
+            stack_.push(2);
+            stack_.push(3);
+            while (!stack_.empty()) {
+                // 出栈
+                cout << format("stack:{}", stack_.top()) << endl;
+                stack_.pop();
             }
-            auto size = s.size();
-            for (auto i = 0; i < size; i++) {
-                cout << format("栈:{}", s.top()) << endl;
-                s.pop();
-            }
-            cout << format("s.size()==0:{}", s.size() == 0) << endl;
+            cout << format("stack_.empty():{}", stack_.empty()) << endl;
         }
         // FIFO:只能在队列的两端进行操作：从尾部插入，从头部取出
         {
+            cout << "<<<" << endl;
             std::queue<int> que_;
-            for (auto i = 0; i < 10; i++) {
-                que_.push(i);
-            }
-            auto size = que_.size();
-            for (auto i = 0; i < size; i++) {
-                cout << format("FIFO:{}", que_.front()) << endl;
+            que_.push(1);
+            que_.push(2);
+            que_.push(3);
+            while (!que_.empty()) {
+                // 从头部取出
+                cout << format("que:{}", que_.front()) << endl;
                 que_.pop();
             }
-            cout << format("size==0:{}", que_.size() == 0) << endl;
+            cout << format("queue.empty():{}", que_.empty()) << endl;
         }
     }
     // iostream
