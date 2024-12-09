@@ -1106,7 +1106,7 @@ cout<<"last name:"<<ln<<endl;\
                 cout << "未找到" << endl;
             }
         }
-        // 键值对
+        // map(基于红黑树实现)
         {
             cout << "<<<" << endl;
             std::map<string, string> map_;
@@ -1122,6 +1122,29 @@ cout<<"last name:"<<ln<<endl;\
             }
             map_.erase("k-1");
             cout << format("size==1:{}", map_.size() == 1) << endl;
+        }
+        // unordered_map(基于哈希表的实现)
+        {
+            cout << "<<<" << endl;
+            std::unordered_map<string, string> map;
+            map.insert({"k-1", "v-1"});
+            map["k-2"] = "v-2";
+            for (auto [k,v]: map) {
+                cout << format("k:{},v:{}", k, v) << endl;
+            }
+            if (map.contains("k-1")) {
+                map.erase("k-1");
+                if (map.find("k-1") == map.end()) {
+                    cout << "not find k-1" << endl;
+                }
+                cout << format("map.size==1:{}", map.size() == 1) << endl;
+            }
+            if (map.contains("k-2")) {
+                auto it = map.find("k-2");
+                if (it != map.end()) {
+                    cout << format("k:{},v:{}", it->first, it->second) << endl;
+                }
+            }
         }
         // 栈
         {
@@ -1172,11 +1195,12 @@ cout<<"last name:"<<ln<<endl;\
         }
         // 指定日期加N天
         {
-            auto ymd = 2024y / 2 / 12;
-            sys_days days_ = ymd;
-            days_ += chrono::days(2);
-            ymd = year_month_day(days_);
-            cout << format("data:{}", ymd) << endl;
+            auto date_ = 2024y / 12 / 2;
+            sys_days s_date_ = date_;
+            s_date_ += chrono::days(2);
+            ostringstream os;
+            os << year_month_day(s_date_);
+            cout << format("date:{}", os.str()) << endl;
         }
     }
 
