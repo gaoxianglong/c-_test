@@ -327,3 +327,5 @@ vector	erase(remove(...))	        vec.erase(std::remove(...), vec.end());
 array	不支持直接删除，需转为动态容器	转为 vector 后用 erase(std::remove(...)) 删除
 map	    erase(键), erase(迭代器)	    mp.erase(2); mp.erase(it);
 
+map是基于红黑树的视线，unordered_map是基于哈希表的视线
+
