@@ -12,6 +12,7 @@
 #include "Account.h"
 #include <chrono>
 #include <iomanip>
+#include <thread>
 
 using namespace c_test;
 using namespace std;
@@ -132,6 +133,11 @@ int methodPtr(int (*addPtr)(int, int), int a, int b);
 string methodPtr2(string (User1::*namePtr)(string), User1 *user1, string name);
 
 string methodPtr3(string (User1::*namePtr)(string), User1 &user1, string name);
+
+// 模拟线程死锁的方法
+void exe1(std::mutex &m1, std::mutex &m2);
+
+void exe2(std::mutex &m1, std::mutex &m2);
 
 // 局部静态变量
 void requestCount() {
@@ -1187,7 +1193,7 @@ cout<<"last name:"<<ln<<endl;\
         // 将时间戳转换为日期
         {
             auto now_ = system_clock::now();
-            auto seconds = chrono::duration_cast<chrono::seconds>(now_.time_since_epoch()).count();
+            auto seconds = std::chrono::duration_cast<std::chrono::seconds>(now_.time_since_epoch()).count();
             auto t_seconds = static_cast<time_t>(seconds);
             ostringstream os;
             os << put_time(std::localtime(&t_seconds), "%Y-%m-%d %H:%M:%S");
@@ -1197,11 +1203,100 @@ cout<<"last name:"<<ln<<endl;\
         {
             auto date_ = 2024y / 12 / 2;
             sys_days s_date_ = date_;
-            s_date_ += chrono::days(2);
+            s_date_ += std::chrono::days(2);
             ostringstream os;
             os << year_month_day(s_date_);
             cout << format("date:{}", os.str()) << endl;
         }
+    }
+    // 线程
+    {
+        cout << "==== thread ====" << endl;
+        // 传递lambda表达式
+        {
+            std::thread t1([]() {
+                ostringstream os;
+                os << std::this_thread::get_id();
+                auto tid = os.str();
+                for (auto i = 0; i < 10; i++) {
+                    cout << format("tid:{},value:{}", tid, i) << endl;
+                }
+            });
+            t1.join();
+        }
+        // 线程死锁
+        {
+            //#define T_EXE
+#ifdef T_EXE
+            cout << "==== thread dead lock ====" << endl;
+            std::mutex m1;
+            std::mutex m2;
+            std::thread t1(exe1, std::ref(m1), std::ref(m2));
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            std::thread t2(exe2, std::ref(m1), std::ref(m2));
+
+            t1.join();
+#endif
+        }
+    }
+    // 锁
+    {
+        cout << "==== lock ====" << endl;
+        std::mutex mtx;
+        auto rlt = [&mtx]() {
+            mtx.lock();
+            cout << "lock success..." << endl;
+            mtx.unlock();
+        };
+        rlt();
+
+        cout << "<<<" << endl;
+        auto rlt2 = [&mtx]() {
+            std::unique_lock<std::mutex> lock(mtx);
+            cout << "lock success..." << endl;
+        };
+        rlt2();
+
+        cout << "<<<" << endl;
+        auto rlt3 = [&mtx]() {
+            std::unique_lock<std::mutex> lock(mtx, std::defer_lock);
+            // 取锁
+            lock.lock();
+            // 查看当前线程是否已经获取到锁
+            if (lock.owns_lock()) {
+                cout << "lock success..." << endl;
+            } else {
+                cout << "lock failed..." << endl;
+            }
+        };
+        rlt3();
+
+        cout << "<<<" << endl;
+        std::timed_mutex mtx2;
+        auto rlt4 = [&mtx2]() {
+            std::unique_lock<std::timed_mutex> lock(mtx2, std::defer_lock);
+            // 延迟尝试取锁，最大等待1秒
+            if (lock.try_lock_for(std::chrono::seconds(1))) {
+                cout << "lock success..." << endl;
+            } else {
+                cout << "lock failed..." << endl;
+            }
+        };
+        rlt4();
+        // 故意锁住不释放
+        mtx2.lock();
+
+        cout << "<<<" << endl;
+        auto rlt5 = [&mtx2]() {
+            std::unique_lock<std::timed_mutex> lock(mtx2, std::chrono::seconds(1));
+            // 最大延迟一秒，查看当前线程是否取到锁
+            if (lock.owns_lock()) {
+                cout << "lock success..." << endl;
+            } else {
+                cout << "lock failed..." << endl;
+            }
+        };
+        rlt5();
     }
 
     cout << "==== end ====" << endl;
@@ -1235,4 +1330,36 @@ string methodPtr2(string (User1::*namePtr)(string), User1 *user1, string name) {
 
 string methodPtr3(string (User1::*namePtr)(string), User1 &user1, string name) {
     return (user1.*namePtr)(name);
+}
+
+void exe1(std::mutex &m1, std::mutex &m2) {
+    ostringstream os;
+    os << std::this_thread::get_id();
+    auto tid = os.str();
+
+    cout << format("tid:{},尝试锁住资源A...", tid) << endl;
+    m1.lock();
+    cout << format("tid:{},锁住资源A成功...", tid) << endl;
+    cout << format("tid:{},尝试资源B资源...", tid) << endl;
+    // 休眠2秒
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+    m2.lock();
+    cout << format("tid:{},锁住资源B成功...", tid) << endl;
+    m1.unlock();
+    m2.unlock();
+}
+
+void exe2(std::mutex &m1, std::mutex &m2) {
+    ostringstream os;
+    os << std::this_thread::get_id();
+    auto tid = os.str();
+
+    cout << format("tid:{},尝试锁住资源B...", tid) << endl;
+    m2.lock();
+    cout << format("tid:{},锁住资源B成功...", tid) << endl;
+    cout << format("tid:{},尝试资源A资源...", tid) << endl;
+    m1.lock();
+    cout << format("tid:{},锁住资源A成功...", tid) << endl;
+    m1.unlock();
+    m2.unlock();
 }
