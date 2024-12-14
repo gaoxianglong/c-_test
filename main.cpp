@@ -11,7 +11,6 @@
 // 加了#idndef包含保护,多次定义会被忽略
 #include "Account.h"
 #include <chrono>
-<<<<<<< HEAD
 #include <deque>
 #include <iomanip>
 #include <mutex>
@@ -19,10 +18,6 @@
 #include <stack>
 #include <thread>
 #include <unordered_map>
-=======
-#include <iomanip>
-#include <thread>
->>>>>>> 4c92c39dab339486ff382376d0b105c4eaaffdd5
 
 using namespace c_test;
 using namespace std;
@@ -235,7 +230,6 @@ std::ostream &operator<<(std::ostream &cout, const MyData &data) {
     return cout;
 }
 
-<<<<<<< HEAD
 // 泛型模版
 template<typename T1, typename T2>
 
@@ -266,8 +260,6 @@ void sum<int, int>(int v1, int v2) {
     cout << format("Specialized sum:{}", v1 + v2) << endl;
 }
 
-=======
->>>>>>> 4c92c39dab339486ff382376d0b105c4eaaffdd5
 int main(int argc, char *argv[]) {
     // 查看C++的版本
     std::cout << __cplusplus << std::endl;
@@ -1126,11 +1118,7 @@ cout<<"last name:"<<ln<<endl;\
         // 双端队列
         {
             cout << "<<<" << endl;
-<<<<<<< HEAD
             deque<int> que_ = {1, 2, 3, 4, 5};
-=======
-            std::deque<int> que_ = {1, 2, 3, 4, 5};
->>>>>>> 4c92c39dab339486ff382376d0b105c4eaaffdd5
             // 插入到队头和队尾
             que_.push_back(6);
             que_.push_front(0);
@@ -1179,11 +1167,7 @@ cout<<"last name:"<<ln<<endl;\
         // unordered_map(基于哈希表的实现)
         {
             cout << "<<<" << endl;
-<<<<<<< HEAD
             unordered_map<string, string> map;
-=======
-            std::unordered_map<string, string> map;
->>>>>>> 4c92c39dab339486ff382376d0b105c4eaaffdd5
             map.insert({"k-1", "v-1"});
             map["k-2"] = "v-2";
             for (auto [k,v]: map) {
@@ -1206,11 +1190,7 @@ cout<<"last name:"<<ln<<endl;\
         // 栈
         {
             cout << "<<<" << endl;
-<<<<<<< HEAD
             stack<int> stack_;
-=======
-            std::stack<int> stack_;
->>>>>>> 4c92c39dab339486ff382376d0b105c4eaaffdd5
             stack_.push(1);
             stack_.push(2);
             stack_.push(3);
@@ -1224,11 +1204,7 @@ cout<<"last name:"<<ln<<endl;\
         // FIFO:只能在队列的两端进行操作：从尾部插入，从头部取出
         {
             cout << "<<<" << endl;
-<<<<<<< HEAD
             queue<int> que_;
-=======
-            std::queue<int> que_;
->>>>>>> 4c92c39dab339486ff382376d0b105c4eaaffdd5
             que_.push(1);
             que_.push(2);
             que_.push(3);
@@ -1311,11 +1287,7 @@ cout<<"last name:"<<ln<<endl;\
 
         cout << "<<<" << endl;
         auto rlt2 = [&mtx]() {
-<<<<<<< HEAD
             unique_lock<std::mutex> lock(mtx);
-=======
-            std::unique_lock<std::mutex> lock(mtx);
->>>>>>> 4c92c39dab339486ff382376d0b105c4eaaffdd5
             cout << "lock success..." << endl;
         };
         rlt2();
@@ -1360,7 +1332,6 @@ cout<<"last name:"<<ln<<endl;\
             }
         };
         rlt5();
-<<<<<<< HEAD
         mtx2.unlock();
     }
     // 泛型模版
@@ -1375,8 +1346,6 @@ cout<<"last name:"<<ln<<endl;\
             sum<int, float>(1, 12.4f);
             sum<int, int>(1, 12);
         }
-=======
->>>>>>> 4c92c39dab339486ff382376d0b105c4eaaffdd5
     }
 
     cout << "==== end ====" << endl;
