@@ -4,12 +4,24 @@
 #include <format>
 #include <memory>
 #include <vector>
+#include <list>
+#include <set>
+#include <map>
 
 // 加了#idndef包含保护,多次定义会被忽略
 #include "Account.h"
+#include <chrono>
+#include <deque>
+#include <iomanip>
+#include <mutex>
+#include <queue>
+#include <stack>
+#include <thread>
+#include <unordered_map>
 
 using namespace c_test;
 using namespace std;
+using namespace chrono;
 
 /**
  * 使用ADL访问
@@ -127,6 +139,11 @@ string methodPtr2(string (User1::*namePtr)(string), User1 *user1, string name);
 
 string methodPtr3(string (User1::*namePtr)(string), User1 &user1, string name);
 
+// 模拟线程死锁的方法
+void exe1(std::mutex &m1, std::mutex &m2);
+
+void exe2(std::mutex &m1, std::mutex &m2);
+
 // 局部静态变量
 void requestCount() {
     // 全局只会初始化一次
@@ -213,10 +230,42 @@ std::ostream &operator<<(std::ostream &cout, const MyData &data) {
     return cout;
 }
 
+// 泛型模版
+template<typename T1, typename T2>
+
+// 泛型类
+class TemplateTest {
+public:
+    T1 id;
+    T2 name;
+
+    TemplateTest(T1 id, T2 name): id(id), name(name) {
+    }
+};
+
+std::ostream &operator<<(std::ostream &cout, const TemplateTest<int, string> &t) {
+    cout << format("id:{},name:{}", t.id, t.name);
+    return cout;
+}
+
+template<typename T1, typename T2>
+// 泛型函数
+void sum(T1 v1, T2 v2) {
+    cout << format("sum:{}", v1 + v2) << endl;
+}
+
+// 泛型专业化，为一个泛型模版提供具体的实现
+template<>
+void sum<int, int>(int v1, int v2) {
+    cout << format("Specialized sum:{}", v1 + v2) << endl;
+}
+
 int main(int argc, char *argv[]) {
     // 查看C++的版本
     std::cout << __cplusplus << std::endl;
 
+    //#define EXE
+#ifdef EXE
     // 基础
     {
         cout << "Please input:" << endl;
@@ -914,6 +963,391 @@ int main(int argc, char *argv[]) {
         MyData data(1, "data...");
         std::cout << data << endl;
     }
+    // 宏
+    {
+        // 常量宏
+        {
+#define ID 123
+#define NAME "JohnGao"
+            cout << format("id:{},name:{}",ID,NAME) << endl;
+            int id = ID;
+            string name = NAME;
+            cout << format("id:{},name:{}", id, name) << endl;
+        }
+        // 函数宏
+        {
+            // 带返回值的函数宏
+#define ADD(a,b)(a+b)
+            cout << format("add:{}",ADD(1, 2)) << endl;
+            // 不带返回值的函数宏
+#define PRINT_NAME(fn,ln)do{\
+cout<<"first name:"<<fn<<endl;\
+cout<<"last name:"<<ln<<endl;\
+}while(0)
+            PRINT_NAME("John", "Gao");
+        }
+        // 条件编译
+        {
+            // 定义宏
+#define NUM 10
+            // 条件编译
+#if NUM > 10
+            cout << "NUM > 10" << endl;
+#else
+            cout << "NUM <= 10" << endl;
+#endif
+
+#ifdef __APPLE__
+            cout << "__APPLE__" << endl;
+#elif defined(_WIN32)
+            cout << "_WIN32" << endl;
+#elif defined(__linux__)
+            cout << "__linux__" << endl;
+#endif
+        }
+    }
+#endif
+
+    cout << "<<<" << endl;
+    // 数据结构
+    {
+        // 固定数组
+        {
+            std::array arr = {1, 2, 3, 4, 5};
+            // 迭代器遍历
+            for (auto i = arr.begin(); i != arr.end(); i++) {
+                cout << format("array:{}", *i) << endl;
+            }
+            cout << "<<<" << endl;
+            // for-each遍历
+            for (auto i: arr) {
+                cout << format("array:{}", i) << endl;
+            }
+            cout << "<<<" << endl;
+            arr = {1, 1, 1, 1, 1};
+            // 范围值替换
+            std::replace(arr.begin(), arr.end(), 1, 2);
+            for (auto i: arr) {
+                cout << format("array:{}", i) << endl;
+            }
+            cout << "<<<" << endl;
+            arr = {10, 2, 31, 14, 15};
+            // 升序排序
+            std::sort(arr.begin(), arr.end());
+            for (auto i: arr) {
+                cout << format("array:{}", i) << endl;
+            }
+            // 降序排序
+            std::sort(arr.begin(), arr.end(), std::greater<int>());
+            for (auto i: arr) {
+                cout << format("array:{}", i) << endl;
+            }
+            cout << "<<<" << endl;
+            // 值查找
+            auto it = std::find(arr.begin(), arr.end(), 2);
+            if (it) {
+                cout << format("值:{}", *it) << endl;
+            } else {
+                cout << "未找到" << endl;
+            }
+            cout << "<<<" << endl;
+            arr = {1, 2, 3, 4, 5};
+            // 二分查找
+            auto rlt = std::binary_search(arr.begin(), arr.end(), 2);
+            cout << format("查找结果:{}", rlt) << endl;
+            // 删除指定元素
+            std::vector<int> v = vector<int>(arr.begin(), arr.end());
+            v.erase(std::remove(v.begin(), v.end(), 5), v.end());
+            for (auto i: v) {
+                cout << format("array:{}", i) << endl;
+            }
+            cout << "<<<" << endl;
+            // 删除迭代器
+            for (auto i = v.begin(); i != v.end();) {
+                if ((*i & 1) == 1) {
+                    i = v.erase(i);
+                    continue;
+                }
+                i++;
+            }
+            for (auto i: v) {
+                cout << format("array:{}", i) << endl;
+            }
+        }
+        // 动态数组
+        {
+            cout << "<<<" << endl;
+            std::vector<int> arr = {1, 2, 3, 4, 5};
+            arr.push_back(6);
+            arr.push_back(7);
+            arr[0] = 100;
+            for (auto i: arr) {
+                cout << format("vector:{}", i) << endl;
+            }
+            cout << "<<<" << endl;
+            arr.erase(std::remove(arr.begin(), arr.end(), 7), arr.end());
+            for (auto i: arr) {
+                cout << format("vector:{}", i) << endl;
+            }
+        }
+        // 双向链表
+        {
+            cout << "<<<" << endl;
+            std::list<int> list_ = {1, 2, 3, 4, 5};
+            // 头尾插入数据
+            list_.push_back(6);
+            list_.push_front(0);
+            for (auto i: list_) {
+                cout << format("list:{}", i) << endl;
+            }
+            cout << "<<<" << endl;
+            // 指定索引位插入数据
+            auto index = list_.begin();
+            std::advance(index, 1);
+            list_.insert(index, 999);
+            for (auto i: list_) {
+                cout << format("list:{}", i) << endl;
+            }
+            // 删除指定数据
+            list_.remove(999);
+            auto it = std::find(list_.begin(), list_.end(), 999);
+            if (it == list_.end()) {
+                cout << "未找到" << endl;
+            }
+        }
+        // 双端队列
+        {
+            cout << "<<<" << endl;
+            deque<int> que_ = {1, 2, 3, 4, 5};
+            // 插入到队头和队尾
+            que_.push_back(6);
+            que_.push_front(0);
+            while (!que_.empty()) {
+                cout << format("deque:{}", que_.front()) << endl;
+                // 移除队头元素
+                que_.pop_front();
+            }
+            cout << format("que_.empty=null:{}", que_.empty()) << endl;
+        }
+        // 唯一集合(红黑树)
+        {
+            cout << "<<<" << endl;
+            std::set<int> set_ = {1, 2, 3, 4, 5};
+            set_.insert(1);
+            set_.insert(2);
+            set_.insert(-1);
+            for (auto i: set_) {
+                cout << format("set:{}", i) << endl;
+            }
+            set_.erase(-1);
+            // if (std::find(set_.begin(), set_.end(), -1) == set_.end()) {
+            //     cout << "未找到" << endl;
+            // }
+            if (!set_.contains(-1)) {
+                cout << "未找到" << endl;
+            }
+        }
+        // map(基于红黑树实现)
+        {
+            cout << "<<<" << endl;
+            std::map<string, string> map_;
+            map_.insert({"k-1", "v-1"});
+            map_["k-2"] = "v-2";
+            for (auto i: map_) {
+                cout << format("map:{}", i.second) << endl;
+            }
+            if (map_.contains("k-1")) {
+                cout << "contains k-1" << endl;
+                auto it = map_.find("k-1");
+                cout << format("k:{},v:{}", it->first, it->second) << endl;
+            }
+            map_.erase("k-1");
+            cout << format("size==1:{}", map_.size() == 1) << endl;
+        }
+        // unordered_map(基于哈希表的实现)
+        {
+            cout << "<<<" << endl;
+            unordered_map<string, string> map;
+            map.insert({"k-1", "v-1"});
+            map["k-2"] = "v-2";
+            for (auto [k,v]: map) {
+                cout << format("k:{},v:{}", k, v) << endl;
+            }
+            if (map.contains("k-1")) {
+                map.erase("k-1");
+                if (map.find("k-1") == map.end()) {
+                    cout << "not find k-1" << endl;
+                }
+                cout << format("map.size==1:{}", map.size() == 1) << endl;
+            }
+            if (map.contains("k-2")) {
+                auto it = map.find("k-2");
+                if (it != map.end()) {
+                    cout << format("k:{},v:{}", it->first, it->second) << endl;
+                }
+            }
+        }
+        // 栈
+        {
+            cout << "<<<" << endl;
+            stack<int> stack_;
+            stack_.push(1);
+            stack_.push(2);
+            stack_.push(3);
+            while (!stack_.empty()) {
+                // 出栈
+                cout << format("stack:{}", stack_.top()) << endl;
+                stack_.pop();
+            }
+            cout << format("stack_.empty():{}", stack_.empty()) << endl;
+        }
+        // FIFO:只能在队列的两端进行操作：从尾部插入，从头部取出
+        {
+            cout << "<<<" << endl;
+            queue<int> que_;
+            que_.push(1);
+            que_.push(2);
+            que_.push(3);
+            while (!que_.empty()) {
+                // 从头部取出
+                cout << format("que:{}", que_.front()) << endl;
+                que_.pop();
+            }
+            cout << format("queue.empty():{}", que_.empty()) << endl;
+        }
+    }
+    // iostream
+    {
+        // 无缓冲，立即写入
+        std::cerr << "error" << endl;
+        // 有缓冲，延迟写入
+        std::clog << "error2" << endl;
+    }
+    // Date
+    {
+        // 将时间戳转换为日期
+        {
+            auto now_ = system_clock::now();
+            auto seconds = std::chrono::duration_cast<std::chrono::seconds>(now_.time_since_epoch()).count();
+            auto t_seconds = static_cast<time_t>(seconds);
+            ostringstream os;
+            os << put_time(std::localtime(&t_seconds), "%Y-%m-%d %H:%M:%S");
+            cout << format("data:{}", os.str()) << endl;
+        }
+        // 指定日期加N天
+        {
+            auto date_ = 2024y / 12 / 2;
+            sys_days s_date_ = date_;
+            s_date_ += std::chrono::days(2);
+            ostringstream os;
+            os << year_month_day(s_date_);
+            cout << format("date:{}", os.str()) << endl;
+        }
+    }
+    // 线程
+    {
+        cout << "==== thread ====" << endl;
+        // 传递lambda表达式
+        {
+            std::thread t1([]() {
+                ostringstream os;
+                os << std::this_thread::get_id();
+                auto tid = os.str();
+                for (auto i = 0; i < 10; i++) {
+                    cout << format("tid:{},value:{}", tid, i) << endl;
+                }
+            });
+            t1.join();
+        }
+        // 线程死锁
+        {
+            //#define T_EXE
+#ifdef T_EXE
+            cout << "==== thread dead lock ====" << endl;
+            std::mutex m1;
+            std::mutex m2;
+            std::thread t1(exe1, std::ref(m1), std::ref(m2));
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            std::thread t2(exe2, std::ref(m1), std::ref(m2));
+
+            t1.join();
+#endif
+        }
+    }
+    // 锁
+    {
+        cout << "==== lock ====" << endl;
+        std::mutex mtx;
+        auto rlt = [&mtx]() {
+            mtx.lock();
+            cout << "lock success..." << endl;
+            mtx.unlock();
+        };
+        rlt();
+
+        cout << "<<<" << endl;
+        auto rlt2 = [&mtx]() {
+            unique_lock<std::mutex> lock(mtx);
+            cout << "lock success..." << endl;
+        };
+        rlt2();
+
+        cout << "<<<" << endl;
+        auto rlt3 = [&mtx]() {
+            std::unique_lock<std::mutex> lock(mtx, std::defer_lock);
+            // 取锁
+            lock.lock();
+            // 查看当前线程是否已经获取到锁
+            if (lock.owns_lock()) {
+                cout << "lock success..." << endl;
+            } else {
+                cout << "lock failed..." << endl;
+            }
+        };
+        rlt3();
+
+        cout << "<<<" << endl;
+        std::timed_mutex mtx2;
+        auto rlt4 = [&mtx2]() {
+            std::unique_lock<std::timed_mutex> lock(mtx2, std::defer_lock);
+            // 延迟尝试取锁，最大等待1秒
+            if (lock.try_lock_for(std::chrono::seconds(1))) {
+                cout << "lock success..." << endl;
+            } else {
+                cout << "lock failed..." << endl;
+            }
+        };
+        rlt4();
+        // 故意锁住不释放
+        mtx2.lock();
+
+        cout << "<<<" << endl;
+        auto rlt5 = [&mtx2]() {
+            std::unique_lock<std::timed_mutex> lock(mtx2, std::chrono::seconds(1));
+            // 最大延迟一秒，查看当前线程是否取到锁
+            if (lock.owns_lock()) {
+                cout << "lock success..." << endl;
+            } else {
+                cout << "lock failed..." << endl;
+            }
+        };
+        rlt5();
+        mtx2.unlock();
+    }
+    // 泛型模版
+    {
+        cout << "==== template ====" << endl;
+        // 泛型基本使用
+        {
+            TemplateTest<int, string> t(123, "admin");
+            cout << t << endl;
+
+            // 泛型方法
+            sum<int, float>(1, 12.4f);
+            sum<int, int>(1, 12);
+        }
+    }
+
     cout << "==== end ====" << endl;
     return 0;
 }
@@ -945,4 +1379,36 @@ string methodPtr2(string (User1::*namePtr)(string), User1 *user1, string name) {
 
 string methodPtr3(string (User1::*namePtr)(string), User1 &user1, string name) {
     return (user1.*namePtr)(name);
+}
+
+void exe1(std::mutex &m1, std::mutex &m2) {
+    ostringstream os;
+    os << std::this_thread::get_id();
+    auto tid = os.str();
+
+    cout << format("tid:{},尝试锁住资源A...", tid) << endl;
+    m1.lock();
+    cout << format("tid:{},锁住资源A成功...", tid) << endl;
+    cout << format("tid:{},尝试资源B资源...", tid) << endl;
+    // 休眠2秒
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+    m2.lock();
+    cout << format("tid:{},锁住资源B成功...", tid) << endl;
+    m1.unlock();
+    m2.unlock();
+}
+
+void exe2(std::mutex &m1, std::mutex &m2) {
+    ostringstream os;
+    os << std::this_thread::get_id();
+    auto tid = os.str();
+
+    cout << format("tid:{},尝试锁住资源B...", tid) << endl;
+    m2.lock();
+    cout << format("tid:{},锁住资源B成功...", tid) << endl;
+    cout << format("tid:{},尝试资源A资源...", tid) << endl;
+    m1.lock();
+    cout << format("tid:{},锁住资源A成功...", tid) << endl;
+    m1.unlock();
+    m2.unlock();
 }

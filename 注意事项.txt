@@ -239,3 +239,109 @@ uintptr_t
 	•	定义： uintptr_t 是 C/C++ 标准库提供的一个无符号整数类型，专门用于以整数形式存储指针值。
 	•	本质： 它是一个与指针大小一致的无符号整数类型，用于纯粹表示内存地址，而没有任何类型信息。
 	•	大小： uintptr_t 的大小由平台决定，足够存储任何指针值，与 void* 的大小一致。
+
+C++宏
+宏是 C++ 中的预处理指令，c++的宏源自于C，最初是为了解决常量和代码片段复用的问题，宏是一种文本替换机制。
+宏的特点是无需类型定义，实现简单且高效，但也因为缺乏类型安全性和调试能力，容易引发问题。
+在现代 C++ 中（C++11 及之后），推荐的标准做法是：
+	1.	避免使用函数宏、宏变量，它的功能可以通过 inline、模板、const、constexpr 或其他特性实现。
+	2.	仅在条件编译和头文件防护等特殊情况下使用宏。
+
+宏可以分为：常量宏、宏函数、使用符号“#”开头的条件编译，#include不是宏
+
+常量宏：
+#define PI 3.14159
+现代 C++ 中，更推荐使用 const 或 constexpr 代替常量宏，因为它们提供了更强的类型安全性和调试能力。
+
+函数宏：
+执行性能比传统函数更好，因为函数宏没有传统函数调用过程中的栈帧的资源消耗，但缺点就是没有语法和类型检查，也不支持调试，推荐使用inline函数来替代函数宏
+同时，现在C++编译器，如果没有显式标记inline函数，编译器针对简单的函数，也会影式将目标函数标记为inline。
+当函数宏中有多个语句的时候，要使用do{}while(0)的形式。需要函数宏有返回值的时候，函数宏的内容必须是一个表达式：
+    // 有返回值的函数宏
+#define SUM(a,b)(a+b)
+    // 没有返回值的函数宏
+#define PRINT_NAME(fn,ln)do{\
+    cout << format("firstName:{}",fn)<<endl;\
+    cout << format("lastName:{}",ln)<<endl;\
+}while(0)
+    // 调用函数宏
+    cout << SUM(10, 20) << endl;
+    PRINT_NAME("John", "Gao");
+
+条件编译
+常用宏指令：
+指令	    描述
+#if	    判断表达式是否为真
+#elif	增加一个条件，后面需要一个合法的常量表达式，和defined组合使用
+#else	否则执行
+#endif	结束条件编译
+#ifdef	判断宏是否已定义
+#ifndef	判断宏是否未定义
+#define	定义一个宏
+#undef	取消宏的定义
+defined	检查宏是否已定义，用于复杂条件表达式中
+
+条件编译示例：
+#ifdef __APPLE__
+    cout << "I am Mac" << endl;
+#elif  defined(__linux__)
+    cout << "I am Linux" << endl;
+#endif
+
+宏的命名规则
+推荐使用全大写的命名规则，以表明这是用户定义的宏。
+如果需要加命名空间，可以使用 _ 分隔单词或加入前缀。
+不要定义以 _ 或 __ 开头的宏，因为这些名称可能与标准库或编译器实现冲突。
+
+数据结构
+固定数组：std::array<int,5> arr;
+动态数组，线性表std::vector<int> arr;
+双向链表：std:list<int> array;
+双端队列:std::deque<int> que_;
+唯一集合:std::set<int> s;（基于红黑树的实现）
+键值对:std::map<int,std::string> maps;
+栈:std::stack<int> s;
+双端队列&先进先出:std::queue que_;
+
+迭代器
+每个容器都有自己的迭代器类型，可用于遍历元素和修改值。最常见的迭代器操作是和begin()，end()分别用于获取指向容器的第一个元素和最后一个元素之后的迭代器。
+std::vector<int> my_vec = {1, 2, 3, 4, 5};
+for(auto it = my_vec.begin(); it != my_vec.end(); ++it) {
+    std::cout << *it << " ";
+}
+通过迭代器迭代元素并同时删除时，返回的迭代器更新当前迭代器：
+    std::list<int> arr = {1, 2, 3, 4, 5};
+    for (auto i = arr.begin(); i != arr.end();) {
+        if ((*i & 1) == 1) {
+            i = arr.erase(i);
+            continue;
+        }
+        i++;
+    }
+
+容器元素删除方式：
+容器类型	删除方式	                    示例
+list	remove, remove_if, erase	lst.remove(3); lst.remove_if(...); lst.erase(it);
+set	    erase(值), erase(迭代器)	    st.erase(3); st.erase(it);
+vector	erase(remove(...))	        vec.erase(std::remove(...), vec.end());
+array	不支持直接删除，需转为动态容器	转为 vector 后用 erase(std::remove(...)) 删除
+map	    erase(键), erase(迭代器)	    mp.erase(2); mp.erase(it);
+
+map是基于红黑树的视线，unordered_map是基于哈希表的视线
+
+线程
+不可复制对象（如 std::mutex、std::unique_ptr），只能按照引用或者指针传递，但是当你通过 std::thread 或 std::bind 调用一个函数时，它们默认按值传递，因此要使用std::ref()函数显示转换为引用。
+std::unique_lock是一个锁管理器，配合std::mutex使用，避免了手动管理锁可能导致的错误（如忘记解锁或死锁）。
+
+泛型
+C++ 泛型（通过模板实现）旨在编写通用代码，使同一份代码可以适用于多种数据类型，从而减少重复代码的编写，同时提升代码的灵活性和可复用性。
+template <typename T>
+T add(T a, T b) {
+    return a + b;
+}
+
+int x = add(1, 2);         // 支持 int
+double y = add(1.5, 2.5);  // 支持 double
+
+模板在编译期生成特定类型的代码，避免运行时类型转换的错误。模板在编译期展开（生成特定类型代码），没有运行时开销。
+模板专业化：模板专业化在 C++ 中的核心作用就是为一个特定的模板类型（类或函数）提供具体的实现。它允许你在模板的通用逻辑基础上，为某些特殊类型或情况定义不同的实现
