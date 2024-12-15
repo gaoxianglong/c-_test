@@ -20,6 +20,20 @@ struct一般是定义在头文件中。
 
 指针：
 指针既可以在栈上分配，也可以在堆上分配,int *a = &b; 和 int *a = new int(10); 都是指针类型
+int a = 100;
+int *b = &a;
+cout << format("a address:{:p}", static_cast<void *>(&a)) << endl;
+// b的内存地址对应的是a的内存地址
+cout << format("a address:{:p}", static_cast<void *>(b)) << endl;
+// &b的内存地址对应的是指针b的内存地址
+cout << format("b address:{:p}", static_cast<void *>(&b)) << endl;
+
+int a = 100;
+const int *const b = &a;
+// 错误,常量值不能进行修改
+*b = 20;
+// 错误,指针b的内存地址不能修改
+b = nullptr;
 
 new:
 在 C++ 中，new 是一个关键字，用于动态分配内存。在运行时，它从堆（heap）中分配一块指定大小的内存，并返回指向该内存的指针
@@ -333,7 +347,7 @@ map是基于红黑树的视线，unordered_map是基于哈希表的视线
 不可复制对象（如 std::mutex、std::unique_ptr），只能按照引用或者指针传递，但是当你通过 std::thread 或 std::bind 调用一个函数时，它们默认按值传递，因此要使用std::ref()函数显示转换为引用。
 std::unique_lock是一个锁管理器，配合std::mutex使用，避免了手动管理锁可能导致的错误（如忘记解锁或死锁）。
 
-泛型
+模版
 C++ 泛型（通过模板实现）旨在编写通用代码，使同一份代码可以适用于多种数据类型，从而减少重复代码的编写，同时提升代码的灵活性和可复用性。
 template <typename T>
 T add(T a, T b) {
@@ -344,5 +358,53 @@ int x = add(1, 2);         // 支持 int
 double y = add(1.5, 2.5);  // 支持 double
 
 模板在编译期生成特定类型的代码，避免运行时类型转换的错误。模板在编译期展开（生成特定类型代码），没有运行时开销。
-模板专业化
+模版分为：通用模版、模版特化、部分模版特化
+通用模版：
+全部都是泛型，适用于所有类型。
+template <typename T, typename U>
+class MyClass {
+    // 所有 T 和 U 的组合都适用
+};
+模版特化：
+指定具体的数据类型，只有这个特定类型组合适用
 模板专业化的核心在于：为某些特定的数据类型提供特定的实现方式，以覆盖通用模板的默认逻辑.
+template <>
+class MyClass<int, double> {  // T 是 int，U 是 double
+    // 只有 T=int 和 U=double 的组合适用
+};
+部分模板特化（不适用于函数模版，只能够用于类模版）：
+一半泛型，一半具体的数据类型，或者 部分类型有特定要求。
+template <typename T>
+class MyClass<T, int> {  // U 被指定为 int，T 仍然是泛型
+    // T 是任意类型，但 U 必须是 int
+};
+
+函数指针：
+方法的入参类型可以是值类型、引用、指针，也可以是函数，类c做法可以使用函数指针：
+int sum(int a, int b) {
+    return a + b;
+}
+/**
+ * 函数指针作为参数
+ * @param sum
+ * @param a
+ * @param b
+ * @return
+ */
+int methodPtr(int (*sum)(int, int), int a, int b) {
+    return sum(a, b);
+}
+除了使用函数指针外，还可以使用函数模版的方式
+template<typename FUNC>
+int sum2(FUNC func, int a, int b) {
+    cout << "template" << endl;
+    return func(a, b);
+}
+
+int main(int argc, char *argv[]) {
+    // 函数指针调用
+    cout << methodPtr(sum, 1, 2) << endl;
+    // 模版方式传递函数
+    cout << sum2(sum, 1, 2) << endl;
+    return 0;
+}

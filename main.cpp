@@ -230,7 +230,7 @@ std::ostream &operator<<(std::ostream &cout, const MyData &data) {
     return cout;
 }
 
-// 泛型模版
+// 通用模版
 template<typename T1, typename T2>
 
 // 泛型类
@@ -243,7 +243,27 @@ public:
     }
 };
 
+// 部分模版特化
+template<typename T1>
+class TemplateTest<string, T1> {
+public:
+    string id;
+    T1 name;
+
+    TemplateTest(string id, T1 name): id(id), name(name) {
+    }
+
+    void print() {
+        cout << format("===id:{},name:{}", id, name) << endl;
+    }
+};
+
 std::ostream &operator<<(std::ostream &cout, const TemplateTest<int, string> &t) {
+    cout << format("id:{},name:{}", t.id, t.name);
+    return cout;
+}
+
+std::ostream &operator<<(std::ostream &cout, const TemplateTest<string, string> &t) {
     cout << format("id:{},name:{}", t.id, t.name);
     return cout;
 }
@@ -258,6 +278,18 @@ void sum(T1 v1, T2 v2) {
 template<>
 void sum<int, int>(int v1, int v2) {
     cout << format("Specialized sum:{}", v1 + v2) << endl;
+}
+
+// 模版参数化列表
+template<typename NAME>
+void printName(NAME name) {
+    cout << format("name:{}", name) << endl;
+}
+
+template<typename NAME, typename... NAMES>
+void printName(NAME name, NAMES... names) {
+    cout << format("name:{}", name) << endl;
+    printName(names...);
 }
 
 int main(int argc, char *argv[]) {
@@ -1334,7 +1366,7 @@ cout<<"last name:"<<ln<<endl;\
         rlt5();
         mtx2.unlock();
     }
-    // 泛型模版
+    // 模版,C++中的泛型实现方式
     {
         cout << "==== template ====" << endl;
         // 泛型基本使用
@@ -1345,6 +1377,15 @@ cout<<"last name:"<<ln<<endl;\
             // 泛型方法
             sum<int, float>(1, 12.4f);
             sum<int, int>(1, 12);
+            // 部分模版特化,不能够用于函数模版，只能够用于类模版
+            TemplateTest<string, string> t2("1-1", "admin");
+            cout << t2 << endl;
+            t2.print();
+        }
+        // 模版可变参数列表
+        {
+            // 模版可变参数这里要通过递归的方式来进行调用
+            printName("zhangsan", "lisi", "wangwu");
         }
     }
 
