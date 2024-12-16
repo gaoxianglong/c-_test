@@ -378,6 +378,46 @@ template <typename T>
 class MyClass<T, int> {  // U 被指定为 int，T 仍然是泛型
     // T 是任意类型，但 U 必须是 int
 };
+类型特征（类似Java中的泛型约束）
+特性	                    作用	                            示例
+std::is_integral	    判断是否为整型	                int, long 等
+std::is_floating_point	判断是否为浮点型	                float, double 等
+std::is_pointer	        判断是否为指针类型	                int* 等
+std::is_arithmetic	    判断是否为算术类型（整型+浮点型）	int, double 等
+std::is_function	    判断是否为函数类型	                void()
+std::is_base_of	        判断是否为某类的子类	            Base -> Derived
+std::decay	            去掉引用、const，返回原始类型	    const int& -> int
+
+std::enable_if
+作用：限制模板函数的参数或类型。
+类似 Java：T extends Number 限制泛型只能是某些子类。
+
+有两个模板参数：
+第一个参数是一个布尔值条件。
+第二个参数是要函数模版的返回值（默认为 void）。
+std::enable_if<Condition, Type>::type:
+如果 Condition 为 true，则 std::enable_if<Condition, Type>::type 等价于 Type（函数模版返回值）。
+如果 Condition 为 false，则 std::enable_if<Condition, Type>::type 不会被定义，从而导致模板实例化失败。
+std::enable_if可以作用域类模版和函数模版上
+
+std::conditional
+作用：根据条件返回一种类型。
+类似 Java：? : 三元运算符，但作用在类型上，跟enable_if比起来多了个else。
+作用在函数模版上：
+template<typename T>
+typename std::conditional<std::is_integral<T>::value, int, double>::type
+print2(T t) {
+    cout << typeid(t).name() << endl;
+}
+作用在类模版上：
+template<typename T1>
+class Base2 {
+public:
+    using type = typename std::conditional<std::is_integral<T1>::value, Base<int>, Sub>::type;
+    void print(T1 t) {
+        type().print(t);
+    }
+};
 
 函数指针：
 方法的入参类型可以是值类型、引用、指针，也可以是函数，类c做法可以使用函数指针：
@@ -408,3 +448,27 @@ int main(int argc, char *argv[]) {
     cout << sum2(sum, 1, 2) << endl;
     return 0;
 }
+
+decltype和typeid
+decltype：
+•	作用：在 编译期 确定变量或表达式的 静态类型。
+•	类比 Java：var 或泛型推导中，编译期确定类型时的机制。
+c++示例：
+int x = 42;
+decltype(x) y = 10; // y 的类型是 int
+Java类比：
+int x = 42;
+var y = x; //
+
+typeid
+•	作用：在 运行时 获取对象的实际类型信息（支持多态）。
+•	类比 Java：类似 Object.getClass() 获取对象的运行时类型，但返回的是类型名的内部标识。
+c++示例：
+int main() {
+    Base* b = new Derived();
+    std::cout << typeid(*b).name() << std::endl; // 输出 Derived 的类型信息
+    delete b;
+}
+Java类比：
+Base b = new Derived();
+System.out.println(b.getClass().getName()); // 输出 "Derived"
