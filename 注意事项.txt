@@ -389,35 +389,73 @@ std::is_base_of	        判断是否为某类的子类	            Base -> Deriv
 std::decay	            去掉引用、const，返回原始类型	    const int& -> int
 
 std::enable_if
-作用：限制模板函数的参数或类型。
-类似 Java：T extends Number 限制泛型只能是某些子类。
-
-有两个模板参数：
-第一个参数是一个布尔值条件。
-第二个参数是要函数模版的返回值（默认为 void）。
-std::enable_if<Condition, Type>::type:
-如果 Condition 为 true，则 std::enable_if<Condition, Type>::type 等价于 Type（函数模版返回值）。
-如果 Condition 为 false，则 std::enable_if<Condition, Type>::type 不会被定义，从而导致模板实例化失败。
-std::enable_if可以作用域类模版和函数模版上
-
-std::conditional
-作用：根据条件返回一种类型。
-类似 Java：? : 三元运算符，但作用在类型上，跟enable_if比起来多了个else。
-作用在函数模版上：
-template<typename T>
-typename std::conditional<std::is_integral<T>::value, int, double>::type
-print2(T t) {
-    cout << typeid(t).name() << endl;
-}
-作用在类模版上：
-template<typename T1>
-class Base2 {
+作用：控制模版是否可以进行实例化，类似 Java：T extends Number 限制泛型只能是某些子类。
+std::enable_if<Condition, Type>::type有两个模板参数：
+Condition是一个bool条件，表示是否可以实例化模版。
+Type是函数模版的返回类型（默认为 void），只有在Condition=true时生效。
+当enable_if定义在类模版上，不需要指定Type，因为类型无返回值，如果定义在函数上时需要显式或隐式指定返回值类型。
+示例：
+// enable_if作用于类模板，控制类模板是否可以实例化
+template<typename T, typename = std::enable_if<std::is_integral<T>::value>::type>
+class User {
 public:
-    using type = typename std::conditional<std::is_integral<T1>::value, Base<int>, Sub>::type;
-    void print(T1 t) {
-        type().print(t);
+    T getId(T t) {
+        return t;
     }
 };
+// enable_if作用域函数模版上，控制函数模版是否可以实例化
+template<typename T>
+typename std::enable_if<std::is_integral<T>::value, int>::type
+getId(T t) {
+    return t;
+}
+
+std::conditional
+作用：conditional不是用来控制模版实例化的，而是根据条件动态选择一个类型。类似三元运算符。
+std::conditional<Condition, TypeA, TypeB>有三个模板参数：
+Condition是一个bool条件，表示选择哪一个类型。
+TypeA，只有在Condition=true时生效，表示选择TypeA类型。
+TypeB，只有在Condition=false时生效，表示选择TypeB类型。
+使用示例：
+// conditional作用于函数模版上时，控制函数模板的参数类型和返回值类型
+template<typename T>
+typename std::conditional<std::is_integral<T>::value, T, float>::type
+getId(T t) {
+    return t;
+}
+
+// conditional作用于类模版上时，控制类模版成员的参数类型
+template<typename T>
+class User {
+    using type = typename std::conditional<std::is_integral<T>::value, T, float>::type;
+public:
+    type id;
+
+    type getId() {
+        return id;
+    }
+};
+
+SFINAE
+在函数模板中，SFINAE 的作用是通过替换模板参数决定是否启用模板。SFINAE 是一种机制，不是具体语法。
+如果只有一个模板（没有其他候选模板可选），而模板参数替换失败时，编译器会报错。这是因为 SFINAE 的核心原则只能在有多个模板可选时生效。
+// 默认类模板
+template <typename T, typename Enable = void>
+class Container;
+// 特化版本，仅当 T 是整型时生效
+template <typename T>
+class Container<T, typename std::enable_if<std::is_integral<T>::value>::type> {
+public:
+    void display() {
+        std::cout << "Integral Container" << std::endl;
+    }
+};
+工作原理：
+    当实例化 Container<int> 时：
+	1.	替换 T = int。
+	2.	默认模板无效，因为 typename std::enable_if<std::is_integral<int>::value>::type 存在。
+	3.	匹配整型特化版本。
+单纯使用模板特化的场景下，也可以基于 SFINAE 机制
 
 函数指针：
 方法的入参类型可以是值类型、引用、指针，也可以是函数，类c做法可以使用函数指针：
