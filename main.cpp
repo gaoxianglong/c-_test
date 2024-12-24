@@ -233,7 +233,7 @@ std::ostream &operator<<(std::ostream &cout, const MyData &data) {
 // 通用模版
 template<typename T1, typename T2>
 
-// 泛型类
+// 类模版
 class TemplateTest {
 public:
     T1 id;
@@ -269,12 +269,12 @@ std::ostream &operator<<(std::ostream &cout, const TemplateTest<string, string> 
 }
 
 template<typename T1, typename T2>
-// 泛型函数
+// 函数模版
 void sum(T1 v1, T2 v2) {
     cout << format("sum:{}", v1 + v2) << endl;
 }
 
-// 泛型专业化，为一个泛型模版提供具体的实现
+// 泛型特化，为一个函数模版提供具体的实现
 template<>
 void sum<int, int>(int v1, int v2) {
     cout << format("Specialized sum:{}", v1 + v2) << endl;
@@ -290,6 +290,34 @@ template<typename NAME, typename... NAMES>
 void printName(NAME name, NAMES... names) {
     cout << format("name:{}", name) << endl;
     printName(names...);
+}
+
+// enable_if:控制模版是否可以实例化
+template<typename T, typename =std::enable_if<std::is_arithmetic<T>::value>::type>
+class UserTest1 {
+public:
+    T id;
+};
+
+template<typename T>
+typename std::enable_if<std::is_arithmetic<T>::value, T>::type
+print_1(T t) {
+    return t;
+}
+
+// conditional:动态选择模版参数类型
+template<typename T>
+class UserTest2 {
+    using type = std::conditional<std::is_pointer<T>::value, T, float>::type;
+
+public:
+    type id;
+};
+
+template<typename T>
+typename std::conditional<std::is_arithmetic<T>::value, T, float>::type
+print_2(T t) {
+    return t;
 }
 
 int main(int argc, char *argv[]) {
@@ -1376,6 +1404,7 @@ cout<<"last name:"<<ln<<endl;\
 
             // 泛型方法
             sum<int, float>(1, 12.4f);
+            // SFINAE，通过替换模版参数来决定是否启用模版
             sum<int, int>(1, 12);
             // 部分模版特化,不能够用于函数模版，只能够用于类模版
             TemplateTest<string, string> t2("1-1", "admin");
@@ -1386,6 +1415,17 @@ cout<<"last name:"<<ln<<endl;\
         {
             // 模版可变参数这里要通过递归的方式来进行调用
             printName("zhangsan", "lisi", "wangwu");
+        }
+        // enable_if控制模版是否可以进行实例化
+        {
+            UserTest1<int> u1;
+            cout << print_1<int>(123) << endl;
+        }
+        // contitional动态选择模版参数类型
+        {
+            // 不影响模版实例化
+            UserTest2<string> u2;
+            cout << print_2<int>(321) << endl;
         }
     }
 
