@@ -365,7 +365,7 @@ template <typename T, typename U>
 class MyClass {
     // 所有 T 和 U 的组合都适用
 };
-模版特化：
+完全模版特化：
 指定具体的数据类型，只有这个特定类型组合适用
 模板专业化的核心在于：为某些特定的数据类型提供特定的实现方式，以覆盖通用模板的默认逻辑.
 template <>
@@ -374,10 +374,19 @@ class MyClass<int, double> {  // T 是 int，U 是 double
 };
 部分模板特化（不适用于函数模版，只能够用于类模版）：
 一半泛型，一半具体的数据类型，或者 部分类型有特定要求。
-template <typename T>
-class MyClass<T, int> {  // U 被指定为 int，T 仍然是泛型
-    // T 是任意类型，但 U 必须是 int
+template <typename T, typename U>
+class MyClass {
+    // 通用模板
 };
+template <typename T>
+class MyClass<T, int> {
+    // 部分特化
+    // T 是任意类型，但 U 被固定为 int
+};
+什么场景下使用完全特化，什么时候使用部分特化？
+	•	部分特化：当你希望对模板中的部分参数进行特定处理，而保留其他参数为泛型时，使用部分特化。
+	•	完全特化：当模板的所有参数都需要特定处理，并且逻辑与通用模板完全不同时，使用完全特化。
+
 类型特征（类似Java中的泛型约束）
 特性	                    作用	                            示例
 std::is_integral	    判断是否为整型	                int, long 等
