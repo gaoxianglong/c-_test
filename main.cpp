@@ -430,7 +430,7 @@ int main(int argc, char *argv[]) {
         cout << format("a:{},b:{},rlt:{}", a, b, rlt2()) << endl;
     }
 
-    // 数组
+    // 原始数组
     {
         int arr1[5] = {1, 2, 3, 4, 5};
         int size = sizeof(arr1) / sizeof(int);
