@@ -1,0 +1,106 @@
+互斥锁
+c++中互斥锁确保某一时刻只有一个线程可以持有锁资源。
+使用示例：
+{
+    std::mutex mtx;
+    {
+        // 获取锁，同步操作
+        mtx.lock();
+        cout << "get lock success..." << endl;
+        // 释放锁资源
+        mtx.unlock();
+    }
+}
+
+如果在获取锁资源的过程中不希望拿不到锁的线程一直被阻塞，则可以使用mutext#try_lock函数来尝试取锁，如果锁资源被其他线程占用则返回fase，反之返回true。
+使用示例：
+{
+    std::mutex mtx;
+    {
+        // 获取锁
+        mtx.lock();
+        cout << "get lock success..." << endl;
+    }
+    // 锁资源未被释放时
+    std::thread t([&mtx]() {
+        ostringstream os;
+        auto tid = std::this_thread::get_id();
+        os << tid;
+        // 锁资源被主线程占用，子线程无法获取锁
+        if (!mtx.try_lock()) {
+            cout << format("tid:{},get lock fail...", os.str()) << endl;
+        }
+    });
+    t.join();
+}
+
+在实际的开发过程中如果直接使用std::mutex来进行互斥动作，需要手动进行锁资源的管理，c++中提供了锁管理器std::unique_lock来管理锁资源。
+使用示例：
+{
+    std::mutex mtx;
+    // 锁管理器
+    auto rlt1 = [&mtx]() {
+        // 自动进行锁资源管理,不需要手动取锁和解锁动作
+        std::unique_lock<std::mutex> lock(mtx);
+        cout << "get lock success..." << endl;
+    };
+    rlt1();
+}
+
+基于std::unique_lock锁管理器，我们还可以进行延迟取锁。
+使用示例：
+{
+    std::mutex mtx;
+    // 锁管理器
+    auto rlt1 = [&mtx]() {
+        // 基于锁管理器的延迟取锁
+        std::unique_lock<std::mutex> lock(mtx, std::defer_lock);
+        // 延迟取锁
+        lock.lock();
+        // 检查当前线程是否已经取到锁
+        if (lock.owns_lock()) {
+            cout << "get lock success..." << endl;
+        } else {
+            cout << "get lock fail..." << endl;
+        }
+    };
+    rlt1();
+}
+
+如果使用std::timed_mutex，我们还可以配合锁资源管理器进行超时尝试取锁，而不会一直阻塞当前未取到锁资源的线程。
+使用示例：
+{
+    std::timed_mutex mtx;
+    // 锁管理器
+    auto rlt1 = [&mtx]() {
+        // 锁管理器,尝试获取锁,超时返回false
+        std::unique_lock<std::timed_mutex> lock(mtx, std::chrono::seconds(1));
+        // 检查当前线程是否已经取到锁
+        if (lock.owns_lock()) {
+            cout << "get lock success..." << endl;
+        } else {
+            cout << "get lock fail..." << endl;
+        }
+    };
+    rlt1();
+}
+
+另外一种写法：
+{
+    std::timed_mutex mtx;
+    // 锁管理器
+    auto rlt1 = [&mtx]() {
+        // 锁管理器
+        std::unique_lock<std::timed_mutex> lock(mtx, std::defer_lock);
+        // 尝试获取锁,超时返回false
+        if (lock.try_lock_for(std::chrono::seconds(1))) {
+            cout << "get lock success..." << endl;
+        } else {
+            cout << "get lock fail..." << endl;
+        }
+    };
+    rlt1();
+}
+
+
+
