@@ -1,0 +1,66 @@
+首先为什么文件头和cpp实现分离编译后还需要引入Pimpl？
+	1.	编译依赖问题
+	•	如果头文件中暴露了私有成员（比如上例中的 int value），那么每次修改 value 的类型（比如改成 std::string），所有包含这个头文件的代码都会重新编译。
+	•	在大型项目中，头文件的一个小改动可能会引发海量的重新编译，浪费时间。
+Pimpl 的解决方法：
+	•	用一个指针（pimpl）代替所有私有成员，把实现类的定义放在 .cpp 文件中。
+	•	修改实现类时，头文件不会变，减少不必要的编译。
+	2.	隐藏实现细节
+	•	即使把实现写在 .cpp 文件中，头文件里仍然会暴露一些实现相关的细节，比如私有成员变量。
+	•	如果是动态库（.so 或 .dll），外部用户可能会看到类的内部布局（通过反编译等手段），导致封装性变差。
+Pimpl 的解决方法：
+	•	用户只看到一个 void*（或 std::unique_ptr）的指针，具体实现完全隐藏。
+	3.	二进制兼容性（ABI 稳定性）
+	•	C++ 类的内存布局取决于成员变量的定义。如果修改了类的私有成员（比如新增一个变量），整个类的二进制接口（ABI）都会变，导致依赖这个类的动态库或程序可能需要重新编译。
+	•	在大型项目中，尤其是开发共享库时，保持 ABI 的兼容性非常重要。
+Pimpl 的解决方法：
+	•	因为头文件只暴露了一个指针，类的内存布局不会因实现细节的变化而改变，保证了 ABI 稳定。
+
+什么是Pimpl?
+Pimpl (Pointer to Implementation) 是一种在 C++ 中用于隐藏类实现细节的设计模式。
+核心思想
+	•	将类的实现细节隐藏在一个指针指向的实现类中。
+	•	接口类只暴露公共接口，不暴露实现细节。
+	•	通过 组合 而非 继承 实现接口与实现的分离。
+
+Pimpl的使用示例：
+PimplTest.h:
+// 向前声明
+class PimplTestImpl;
+
+class PimplTest {
+public:
+    PimplTest();
+
+    ~PimplTest();
+
+    void print();
+
+private:
+    std::unique_ptr<PimplTestImpl> impl;
+};
+
+PimplTest.cpp:
+#include "PimplTest.h"
+#include <iostream>
+
+class PimplTestImpl {
+public:
+    void print() {
+        std::cout << "PimplTestImpl::print()" << std::endl;
+    }
+};
+PimplTest::PimplTest(): impl(std::make_unique<PimplTestImpl>()) {
+}
+PimplTest::~PimplTest() = default;
+void PimplTest::print() {
+    impl->print();
+}
+main.cpp:
+PimplTest pimplTest;
+pimplTest.print();
+
+Pimpl的优点
+1.	隐藏实现细节：用户无法访问实现类。
+2.	减少编译依赖：实现类改动不影响接口类，减少编译时间。
+3.	保持ABI（二进制接口）稳定性：接口类的布局固定，动态库不受实现变化影响。

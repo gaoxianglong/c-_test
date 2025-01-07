@@ -18,10 +18,12 @@
 #include <stack>
 #include <thread>
 #include <unordered_map>
+#include "PimplTest.h"
 
 using namespace c_test;
 using namespace std;
 using namespace chrono;
+
 
 /**
  * 使用ADL访问
@@ -1427,6 +1429,11 @@ cout<<"last name:"<<ln<<endl;\
             UserTest2<string> u2;
             cout << print_2<int>(321) << endl;
         }
+    }
+    // Pimpl
+    {
+        PimplTest pimplTest;
+        pimplTest.print();
     }
 
     cout << "==== end ====" << endl;
