@@ -50,8 +50,12 @@ public:
         std::cout << "PimplTestImpl::print()" << std::endl;
     }
 };
+
+// 实例化PimplTest的时候加载构造函数
 PimplTest::PimplTest(): impl(std::make_unique<PimplTestImpl>()) {
 }
+
+// 销毁PimplTest的时候调用析构函数
 PimplTest::~PimplTest() = default;
 void PimplTest::print() {
     impl->print();

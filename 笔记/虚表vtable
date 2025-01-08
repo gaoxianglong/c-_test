@@ -1,0 +1,140 @@
+在 C++ 中，当一个基类有多个派生类（实现类）时，虚表（vtable）是用来支持动态多态的关键机制。它通过指向实际派生类的方法地址来实现函数调用的动态绑定。以下是虚表如何对应不同实现函数地址的过程：
+1. 虚表的结构
+	•	每个具有虚函数的类在编译时都会生成一个 虚表。
+	•	虚表是一个函数指针数组，存储了该类的所有虚函数的地址。
+	•	如果一个派生类覆盖了基类的虚函数，派生类的虚表中对应的条目会被更新为派生类实现的函数地址。
+
+2. 对象中的虚表指针
+	•	每个类的实例（对象）中都会有一个隐藏的指针（通常称为 vptr），指向该类的虚表。
+	•	当对象被构造时：
+	•	如果对象是基类类型的实例，vptr 指向基类的虚表。
+	•	如果对象是派生类类型的实例，vptr 被设置为指向派生类的虚表。
+
+3. 虚表的更新规则
+假设基类和派生类的定义如下：
+class Base {
+public:
+    virtual void funcA() {
+        std::cout << "Base::funcA" << std::endl;
+    }
+    virtual void funcB() {
+        std::cout << "Base::funcB" << std::endl;
+    }
+    virtual ~Base() = default;
+};
+
+class Derived : public Base {
+public:
+    void funcA() override {
+        std::cout << "Derived::funcA" << std::endl;
+    }
+    void funcB() override {
+        std::cout << "Derived::funcB" << std::endl;
+    }
+};
+虚表内容（逻辑上）如下：
+	•	基类虚表：
+vtable for Base:
+[0] Address of Base::funcA
+[1] Address of Base::funcB
+
+	•	派生类虚表：
+vtable for Derived:
+[0] Address of Derived::funcA
+[1] Address of Derived::funcB
+
+4. 动态绑定的执行流程
+当通过基类指针或引用调用虚函数时：
+	1.	vptr 指向派生类的虚表。
+	2.	编译器生成的代码会根据虚函数的偏移量查找虚表中的函数地址。
+	3.	实际调用派生类的虚表中对应的虚函数地址。
+
+示例代码：
+Base* base = new Derived();
+base->funcA();  // 动态绑定，调用 Derived::funcA
+base->funcB();  // 动态绑定，调用 Derived::funcB
+
+执行过程：
+	1.	base->funcA()：
+	•	通过 base 的 vptr，找到 Derived 类的虚表。
+	•	在虚表的第一个位置，找到 Derived::funcA 的地址并调用。
+	2.	base->funcB()：
+	•	在虚表的第二个位置，找到 Derived::funcB 的地址并调用。
+
+5. 当有 N 个派生类时
+
+如果基类有 N 个派生类，每个派生类都会生成一个自己的虚表，虚表的结构依然保持一致（和基类虚表的布局相同）。每个派生类的虚表会将对应的虚函数条目更新为派生类实现的函数地址。
+
+例如，若有三个派生类：
+	•	基类虚表：
+[0] Base::funcA
+[1] Base::funcB
+
+	•	派生类1虚表：
+[0] Derived1::funcA
+[1] Derived1::funcB
+
+	•	派生类2虚表：
+[0] Derived2::funcA
+[1] Derived2::funcB
+
+	•	派生类3虚表：
+[0] Derived3::funcA
+[1] Derived3::funcB
+
+每个类的对象通过其 vptr 指向自己所属的虚表，实现动态绑定。
+
+总结
+虚表通过以下方式对应不同实现函数的地址：
+	1.	基类和每个派生类都维护独立的虚表，互不影响。
+	2.	虚表条目对应基类中声明的虚函数顺序。
+	3.	派生类覆盖虚函数时，派生类虚表中对应条目被更新为派生类的实现地址。
+	4.	使用里氏替换原则时，基类通过指针或者引用访问虚函数时，通过派生对象的 vptr 完成动态绑定，从而调用派生类虚表的函数地址。
+
+
+指针数组的访问顺序
+1. 虚表的结构
+	•	虚表本质上是一个指针数组，其中每个指针指向相应虚函数的实现地址。
+	•	顺序：
+虚表中每个虚函数的索引是基于 基类声明虚函数的顺序 而确定的，从 0 开始计数。
+
+2. 函数与虚表条目的对应关系
+	•	如果类中第 4 个虚函数是 method4（按声明顺序排第 4 个），那么它在虚表中的索引是 3（因为索引从 0 开始）。
+	•	例如：
+假设类 MyClass 有如下虚函数：
+class MyClass {
+public:
+    virtual void method1();
+    virtual void method2();
+    virtual void method3();
+    virtual void method4();
+    virtual void method5();
+    virtual void method6();
+    virtual void method7();
+    virtual void method8();
+    virtual void method9();
+    virtual void method10();
+};
+	•	虚表索引和对应函数：
+vtable for MyClass:
+[0] Address of method1
+[1] Address of method2
+[2] Address of method3
+[3] Address of method4
+[4] Address of method5
+[5] Address of method6
+[6] Address of method7
+[7] Address of method8
+[8] Address of method9
+[9] Address of method10
+
+3. 调用流程
+
+假设调用 method4：
+	1.	编译器知道 method4 在虚表中的索引是 3（基于声明顺序）。
+	2.	在运行时，vptr 指向当前对象的虚表。
+	3.	编译器生成的代码通过虚表的 第 3 个条目（索引为 3）找到 method4 的地址并调用它。
+
+4. 重要特性
+    •	虚表布局固定： 虚函数的顺序由基类的声明决定，即使派生类覆盖了某些虚函数，其顺序仍然遵循基类的定义。
+    •	效率高： 查找虚函数地址只需要一个索引操作（数组访问），时间复杂度为 O(1)。
