@@ -322,6 +322,30 @@ print_2(T t) {
     return t;
 }
 
+// 静态多态
+template<typename T>
+class MyBase {
+public:
+    void exe() {
+        // 将基类指针转换为派生类指针
+        static_cast<T *>(this)->exeImpl();
+    }
+
+    void exeImpl() {
+        cout << "MyBase exe" << endl;
+    }
+};
+
+class Sub1 : public MyBase<Sub1> {
+public:
+    void exeImpl() {
+        cout << "Sub1 exe" << endl;
+    }
+};
+
+class Sub2 : public MyBase<Sub2> {
+};
+
 int main(int argc, char *argv[]) {
     // 查看C++的版本
     std::cout << __cplusplus << std::endl;
@@ -1432,8 +1456,15 @@ cout<<"last name:"<<ln<<endl;\
     }
     // Pimpl
     {
+        cout << "==== pimpl ====" << endl;
         PimplTest pimplTest;
         pimplTest.print();
+    }
+    // CRTP静态多态
+    {
+        cout << "==== crtp ====" << endl;
+        MyBase<Sub1>().exe();
+        MyBase<Sub2>().exe();
     }
 
     cout << "==== end ====" << endl;

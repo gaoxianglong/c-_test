@@ -24,12 +24,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b69bdb95-ace7-438a-9e2a-b7903489091a" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/PimplTest.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/PimplTest.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/笔记/Pimpl(指向实现的指针)" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/笔记/CRTP静态多态" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/main.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/注意事项.txt" beforeDir="false" afterPath="$PROJECT_DIR$/注意事项.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
