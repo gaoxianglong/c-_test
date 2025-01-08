@@ -6,32 +6,36 @@
 示例：
 // 静态多态
 template<typename T>
-class MyBase {
+class Base {
+public:
+    T *getPtr() {
+        // 将基类指针转换为派生类指针
+        return static_cast<T *>(this);
+    }
+
+    void exe() {
+        cout << "Base::exe()" << endl;
+    }
+};
+
+class Sub1 : public Base<Sub1> {
 public:
     void exe() {
-        // 编译期将基类指针转换为派生类指针
-        static_cast<T *>(this)->exeImpl();
-    }
-
-    void exeImpl() {
-        cout << "MyBase exe" << endl;
+        cout << "Sub1::exe()" << endl;
     }
 };
 
-class Sub1 : public MyBase<Sub1> {
-public:
-    void exeImpl() {
-        cout << "Sub1 exe" << endl;
-    }
+class Sub2 : public Base<Sub2> {
 };
 
-class Sub2 : public MyBase<Sub2> {
-};
+int main(int argc, char *argv[]) {
+    Base<Sub1> b1;
+    b1.getPtr()->exe();
 
-main.cpp
-// 或者Sub1().exe();
-MyBase<Sub1>().exe();
-MyBase<Sub2>().exe();
+    Base<Sub2> b2;
+    b2.getPtr()->exe();
+    return 0;
+}
 
 静态多态和动态多态的区别
 特性	            静态多态（CRTP）	                运行时多态
