@@ -1,0 +1,88 @@
+在 C++ 中，不可复制的含义是指禁止通过 拷贝构造函数 或 拷贝赋值操作符 来复制类的实例对象。
+
+class Test {
+public:
+    Test() = default;
+    ~Test() = default;
+
+    Test(const Test &) = delete; // 禁止拷贝构造
+    Test &operator=(const Test &) = delete; // 禁止拷贝赋值
+};
+
+1. 不可复制的实际含义
+
+通过 = delete 删除拷贝构造函数和拷贝赋值操作符后：
+1.	禁止拷贝构造： 不能通过拷贝另一个对象来初始化该类的对象。例如：
+Test t1;
+Test t2 = t1; // 编译错误：拷贝构造函数被删除
+
+2.	禁止拷贝赋值： 不能通过赋值将一个对象的值拷贝到另一个对象。例如：
+Test t1, t2;
+t1 = t2; // 编译错误：拷贝赋值操作符被删除
+
+这与是否可以传递指针无关。实际上，指针的传递并不涉及对象的拷贝。例如：
+Test t;
+Test* ptr = &t; // 合法：指针传递并不涉及拷贝
+
+2. 不可复制的用途
+
+不可复制的类通常用于以下场景：
+	1.	单例模式： 单例模式要求类只有一个实例，不可被复制。
+	class Singleton {
+    public:
+        static Singleton& getInstance() {
+            static Singleton instance;
+            return instance;
+        }
+
+        Singleton(const Singleton&) = delete;
+        Singleton& operator=(const Singleton&) = delete;
+
+    private:
+        Singleton() = default;
+    };
+
+	2.	资源管理类： 包括文件句柄、网络连接等资源的管理类，禁止复制是为了避免资源重复释放。
+    class FileManager {
+    public:
+        FileManager() { /* 打开文件 */ }
+        ~FileManager() { /* 关闭文件 */ }
+
+        FileManager(const FileManager&) = delete;
+        FileManager& operator=(const FileManager&) = delete;
+    };
+
+    3. 与指针传递的关系
+
+    不可复制并不意味着不能传递指针或引用：
+    	•	指针传递： 传递指针不涉及对象的拷贝，因此是允许的：
+    	Test t;
+        Test* ptr = &t; // 指针传递合法
+
+        •	引用传递： 传递引用也不涉及对象的拷贝，因此是允许的：
+        Test t;
+        void useTest(const Test& tRef); // 合法
+        useTest(t);
+
+        但是，以下操作会尝试复制对象，从而导致编译错误：
+        	•	将对象作为值传递到函数：
+        	void useTest(Test t); // 编译错误：值传递会触发拷贝构造
+
+        	•	返回对象而不是引用或指针：
+            Test createTest(); // 编译错误：返回值会触发拷贝构造
+
+4. 总结
+
+Test(const Test&) = delete; 和 Test& operator=(const Test&) = delete; 表示该类不可复制，禁止任何形式的拷贝构造和拷贝赋值操作。
+	•	与传递指针无关，指针和引用的传递是合法的。
+	•	这种设计常用于防止错误的对象复制，确保资源管理类或具有唯一性语义的类安全性。
+
+
+NonCopyable 是一个基类，它封装了删除拷贝构造和拷贝赋值的行为。通过继承这个类，任何派生类（比如 MyClass）都自动继承了这些行为，成为不可复制的类。
+2. private NonCopyable 的作用
+class MyClass : private NonCopyable {
+    // MyClass is now non-copyable
+};
+	•	private 继承 表示 MyClass 继承了 NonCopyable 的所有成员，但这些成员在 MyClass 中是私有的。
+	•	由于 NonCopyable 中的拷贝构造函数和拷贝赋值操作符已经被标记为 = delete，任何尝试复制或赋值 MyClass 的操作都会触发编译错误。
+	•	继承的作用 是避免在每个不可复制的类中重复实现相同的代码（即删除拷贝构造函数和赋值操作符），从而简化代码维护。

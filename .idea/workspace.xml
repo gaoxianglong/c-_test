@@ -24,8 +24,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b69bdb95-ace7-438a-9e2a-b7903489091a" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/笔记/不可复制" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/笔记/问题" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/笔记/CRTP静态多态" beforeDir="false" afterPath="$PROJECT_DIR$/笔记/CRTP静态多态" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -131,7 +132,7 @@
       <workItem from="1733216776025" duration="358000" />
       <workItem from="1733387628750" duration="3349000" />
       <workItem from="1736301653900" duration="26000" />
-      <workItem from="1736338790869" duration="4334000" />
+      <workItem from="1736338790869" duration="9918000" />
     </task>
     <servers />
   </component>
